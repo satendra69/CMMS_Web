@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[6989],{56989:(e,s,n)=>{n.r(s),n.d(s,{default:()=>i});var r=n(6907),c=n(74007),t=n(80184);function i(){return(0,t.jsxs)(t.Fragment,{children:[(0,t.jsx)(r.ql,{children:(0,t.jsx)("title",{children:" Foundations: Grid"})}),(0,t.jsx)(c.zG,{})]})}}}]);
+//# sourceMappingURL=6989.d6773198.chunk.js.map

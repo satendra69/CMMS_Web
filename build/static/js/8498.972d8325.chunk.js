@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[8498],{68498:(e,s,c)=>{c.r(s),c.d(s,{default:()=>i});var n=c(6907),r=c(19208),t=c(66505),d=c(80184);function i(){const e=(0,r.UO)(),{id:s}=e;return(0,d.jsxs)(d.Fragment,{children:[(0,d.jsx)(n.ql,{children:(0,d.jsx)("title",{children:" Dashboard: Tour Edit"})}),(0,d.jsx)(t.AE,{id:"".concat(s)})]})}}}]);
+//# sourceMappingURL=8498.972d8325.chunk.js.map

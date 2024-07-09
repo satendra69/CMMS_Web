@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[6982],{16982:(s,e,c)=>{c.r(e),c.d(e,{default:()=>i});var n=c(6907),t=c(19208),r=c(66505),a=c(80184);function i(){const s=(0,t.UO)(),{id:e}=s;return(0,a.jsxs)(a.Fragment,{children:[(0,a.jsx)(n.ql,{children:(0,a.jsx)("title",{children:" Dashboard: Analytics"})}),(0,a.jsx)(r.XJ,{id:"".concat(e)})]})}}}]);
+//# sourceMappingURL=6982.75474e80.chunk.js.map

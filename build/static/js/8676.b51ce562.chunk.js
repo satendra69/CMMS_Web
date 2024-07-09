@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[8676],{38676:(e,s,r)=>{r.r(s),r.d(s,{default:()=>l});var c=r(6907),n=r(22665),t=r(80184);function l(){return(0,t.jsxs)(t.Fragment,{children:[(0,t.jsx)(c.ql,{children:(0,t.jsx)("title",{children:" Dashboard: User List"})}),(0,t.jsx)(n.Qu,{})]})}}}]);
+//# sourceMappingURL=8676.b51ce562.chunk.js.map

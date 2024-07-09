@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[5284],{45284:(s,e,t)=>{t.r(e),t.d(e,{default:()=>l});var c=t(6907),n=t(4087),r=t(80184);function l(){return(0,r.jsxs)(r.Fragment,{children:[(0,r.jsx)(c.ql,{children:(0,r.jsx)("title",{children:" Post: List"})}),(0,r.jsx)(n.Ns,{})]})}}}]);
+//# sourceMappingURL=5284.5d8ece18.chunk.js.map

@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[14],{20014:(e,s,r)=>{r.r(s),r.d(s,{default:()=>c});var n=r(6907),t=r(66505),a=r(80184);function c(){return(0,a.jsxs)(a.Fragment,{children:[(0,a.jsx)(n.ql,{children:(0,a.jsx)("title",{children:" Dashboard: Create a new tour"})}),(0,a.jsx)(t.lm,{})]})}}}]);
+//# sourceMappingURL=14.f14ac052.chunk.js.map

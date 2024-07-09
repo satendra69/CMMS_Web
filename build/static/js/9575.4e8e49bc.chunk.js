@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[9575],{39575:(e,t,s)=>{s.r(t),s.d(t,{default:()=>i});var c=s(6907),n=s(19208),l=s(4087),r=s(80184);function i(){const e=(0,n.UO)(),{title:t}=e;return(0,r.jsxs)(r.Fragment,{children:[(0,r.jsx)(c.ql,{children:(0,r.jsx)("title",{children:" Dashboard: Post Edit"})}),(0,r.jsx)(l.mv,{title:"".concat(t)})]})}}}]);
+//# sourceMappingURL=9575.4e8e49bc.chunk.js.map
