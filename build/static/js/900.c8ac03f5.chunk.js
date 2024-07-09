@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[900],{30900:(e,s,r)=>{r.r(s),r.d(s,{default:()=>t});var n=r(6907),a=r(22665),c=r(80184);function t(){return(0,c.jsxs)(c.Fragment,{children:[(0,c.jsx)(n.ql,{children:(0,c.jsx)("title",{children:" Dashboard: Create a new user"})}),(0,c.jsx)(a.BS,{})]})}}}]);
-//# sourceMappingURL=900.c8ac03f5.chunk.js.map

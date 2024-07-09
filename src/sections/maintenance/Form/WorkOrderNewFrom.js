@@ -345,6 +345,8 @@ export default function WordOrderNewForm({ currentUser, onPageChange }) {
   const assetNoAutocompleteRef = useRef(null);
   const faultCodeAutocompleteRef = useRef(null);
 
+  const [isFormFiled, setIsFormFiled] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       if (RowID !== "" && RowID !== null && RowID !== undefined) {
@@ -383,8 +385,6 @@ export default function WordOrderNewForm({ currentUser, onPageChange }) {
 
     fetchData();
   }, []);
-
-  // test funcation
 
   // Get All Filed label Name
   const getWorkOrderLebel = async () => {
@@ -482,9 +482,15 @@ export default function WordOrderNewForm({ currentUser, onPageChange }) {
         setSelected_Asset_Location({
           label: responseJson.data.data[0].wko_mst_asset_location,
         });
-        setSelected_Fault_Code({
-          label: responseJson.data.data[0].wko_mst_flt_code,
-        });
+      
+        if (responseJson.data.data[0].wko_mst_flt_code == null) {
+          setSelected_Fault_Code("");
+        } else {
+          setSelected_Fault_Code({
+            label: responseJson.data.data[0].wko_mst_flt_code,
+          });
+        }
+
         setDescription(responseJson.data.data["0"].wko_mst_descs);
         //setDbImg(responseJson.data.data['0'].attachment)
 
@@ -3378,11 +3384,7 @@ if (missingFields.length > 0) {
   const handleUploadCloseClick = () => {
     setImagePreview("");
   };
-  const handleSelectedFaultCode = (selectedOption) => {
-    const newValue =
-      selectedOption && selectedOption.value ? selectedOption : null;
-    setDescription(newValue ? newValue.value : null);
-  };
+
 
   // OnChange to check error funcation
   const handleStatusChange = (event, value) => {
@@ -3433,14 +3435,40 @@ if (missingFields.length > 0) {
     setIsChargeCostEmpty(false);
     setIsChargeCostEmpty(false);
   };
-  const handleFaultCodeChange = (event, value) => {
-    const newValue = value === null ? null : value;
+  const handleFaultCodeChange = (selectedOption) => {
+   // const newValue = value === null ? null : value;
+   console.log("Description_____",Description);
+   setSelected_Fault_Code(selectedOption);
+   if (selectedOption) {
+if(Description !== ""){
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "Do you want to overwrite the description?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, overwrite it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setDescription(selectedOption.value);
+        
+      }
+    });
+  }else{
+    setDescription(selectedOption.value);
+  }
+  } else {
+    //setDescription("");
+  }
 
-    setSelected_Fault_Code(newValue);
-    handleSelectedFaultCode(newValue);
+
+   //
+    //handleSelectedFaultCode(newValue);
     setIsFaultCodeEmpty(false);
     setErrorField(null);
   };
+
   const handleOriginalPeriorityChange = (event, value) => {
     setSelected_Original_Periority(value);
     setIsOriginalPeriorityEmpty(false);
@@ -3466,6 +3494,24 @@ if (missingFields.length > 0) {
    // console.log("data++++++++", data);
     window.location.reload();
   };
+
+  const handleNumericInputChange = (e, setterFunction) => {
+    let { value } = e.target;
+    value = value.replace(/[^\d.]/g, ''); // Remove non-numeric characters except decimal
+    value = value.slice(0, 16); // Limit to 16 characters including decimals and commas
+  
+    const parts = value.split('.');
+    let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    if (integerPart.length > 11) {
+      integerPart = integerPart.slice(0, 12) + '.' + integerPart.slice(12, 16);
+    }
+    let decimalPart = parts[1] ? parts[1].slice(0, 4) : '';
+  
+    const formattedValue = decimalPart ? `${integerPart}.${decimalPart}` : integerPart;
+    setterFunction(formattedValue); // Set the state for the respective UDFNumber state
+    setErrorField(null);
+  };
+
   return (
     <>
       <Helmet>
@@ -3497,7 +3543,7 @@ if (missingFields.length > 0) {
             // heading="Create Work Order"
             heading={
               RowID
-                ? `Update ${WorkOrderNo} Work Order`
+                ? `Edit ${WorkOrderNo} Work Order`
                 : completeRowID
                 ? `Complete ${WorkOrderNo} Work Order`
                 : closeRowID
@@ -3540,7 +3586,7 @@ if (missingFields.length > 0) {
                           startIcon={<Iconify icon="jam:close" />}
                           onClick={onClickCancel}
                         >
-                          Close
+                          Cancel
                         </Button>
                       </div>
                     );
@@ -4421,9 +4467,16 @@ if (missingFields.length > 0) {
                                   variant="outlined"
                                   size="small"
                                   className="Extrasize"
-                                  defaultValue={Phone}
+                                  value={Phone}
+                                 
                                   onChange={(e) => {
-                                    setPhone(e.target.value);
+                             
+                                    const value = e.target.value;
+                                    if (value.length <= 20) {
+                                      setPhone(value);
+                                    }
+                                    setErrorField(null); 
+                                    setIsFormFiled(true);
                                   }}
                                 />
                               </Stack>
@@ -4504,7 +4557,12 @@ if (missingFields.length > 0) {
                                 <Autocomplete
                                   options={Fault_Code}
                                   value={selected_Fault_Code?.label ?? ""}
-                                  onChange={handleFaultCodeChange}
+                                
+                                  onChange={(event, value) => {
+                                    handleFaultCodeChange(value);
+                                    setErrorField(null); 
+                                    setIsFormFiled(true);
+                                  }}
                                   renderInput={(params) => (
                                     <div>
                                       <TextField
@@ -4538,8 +4596,15 @@ if (missingFields.length > 0) {
                                   placeholder="Description..."
                                   minRows={6}
                                   value={Description}
+                                 
                                   onChange={(e) => {
-                                    setDescription(e.target.value);
+                             
+                                    const value = e.target.value;
+                                    if (value.length <= 2000) {
+                                      setDescription(value);
+                                    }
+                                    setErrorField(null); 
+                                    setIsFormFiled(true);
                                     setIsWorkDescEmpty(false);
                                   }}
                                   className={`Extrasize ${
@@ -5096,7 +5161,14 @@ if (missingFields.length > 0) {
                               className="TxtAra"
                               style={{ width: "100%" }} // Make it full-width
                               onChange={(e) => {
-                                setCorrectiveAction(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 2000) {
+                                  setCorrectiveAction(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
+                                
                               }}
                             />
                           </Stack>
@@ -5976,8 +6048,15 @@ if (missingFields.length > 0) {
                               minRows={6}
                               className="TxtAra"
                               style={{ width: "100%" }} // Make it full-width
+                              
                               onChange={(e) => {
-                                setUDFNote1(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 1000) {
+                                  setUDFNote1(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -5995,9 +6074,16 @@ if (missingFields.length > 0) {
                               variant="outlined"
                               size="small"
                               fullWidth
-                              defaultValue={UDFText_1}
+                              value={UDFText_1}
+                             
                               onChange={(e) => {
-                                setUDFText_1(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_1(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6011,9 +6097,16 @@ if (missingFields.length > 0) {
                               variant="outlined"
                               size="small"
                               fullWidth
-                              defaultValue={UDFText_2}
+                              value={UDFText_2}
+                             
                               onChange={(e) => {
-                                setUDFText_2(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_2(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6028,8 +6121,15 @@ if (missingFields.length > 0) {
                               size="small"
                               fullWidth
                               defaultValue={UDFText_3}
+                             
                               onChange={(e) => {
-                                setUDFText_3(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_3(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6044,8 +6144,15 @@ if (missingFields.length > 0) {
                               size="small"
                               fullWidth
                               defaultValue={UDFText_4}
+                             
                               onChange={(e) => {
-                                setUDFText_4(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_4(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6060,8 +6167,15 @@ if (missingFields.length > 0) {
                               size="small"
                               fullWidth
                               defaultValue={UDFText_5}
+                              
                               onChange={(e) => {
-                                setUDFText_5(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_5(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6076,8 +6190,15 @@ if (missingFields.length > 0) {
                               size="small"
                               fullWidth
                               defaultValue={UDFText_6}
+                             
                               onChange={(e) => {
-                                setUDFText_6(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_6(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6092,8 +6213,15 @@ if (missingFields.length > 0) {
                               size="small"
                               fullWidth
                               defaultValue={UDFText_7}
+                              
                               onChange={(e) => {
-                                setUDFText_7(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_7(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6108,8 +6236,15 @@ if (missingFields.length > 0) {
                               variant="outlined"
                               fullWidth
                               defaultValue={UDFText_8}
+                             
                               onChange={(e) => {
-                                setUDFText_8(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_8(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6124,8 +6259,15 @@ if (missingFields.length > 0) {
                               size="small"
                               fullWidth
                               defaultValue={UDFText_9}
+                             
                               onChange={(e) => {
-                                setUDFText_9(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_9(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6140,8 +6282,15 @@ if (missingFields.length > 0) {
                               size="small"
                               fullWidth
                               defaultValue={UDFText_10}
+                            
                               onChange={(e) => {
-                                setUDFText_10(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_10(value);
+                                }
+                                setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -6158,9 +6307,16 @@ if (missingFields.length > 0) {
                               size="small"
                               placeholder=".0000"
                               fullWidth
-                              defaultValue={UDFNumber_1}
+                              value={UDFNumber_1}
+                              
                               onChange={(e) => {
-                                setUDFNumber_1(e.target.value);
+                                
+                                handleNumericInputChange(e, setUDFNumber_1);
+                                setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -6175,9 +6331,16 @@ if (missingFields.length > 0) {
                               size="small"
                               placeholder=".0000"
                               fullWidth
-                              defaultValue={UDFNumber_2}
+                              value={UDFNumber_2}
+                              
                               onChange={(e) => {
-                                setUDFNumber_2(e.target.value);
+                                
+                                handleNumericInputChange(e, setUDFNumber_2);
+                                setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -6192,9 +6355,16 @@ if (missingFields.length > 0) {
                               size="small"
                               placeholder=".0000"
                               fullWidth
-                              defaultValue={UDFNumber_3}
+                              value={UDFNumber_3}
+                             
                               onChange={(e) => {
-                                setUDFNumber_3(e.target.value);
+                                
+                                handleNumericInputChange(e, setUDFNumber_3);
+                                setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -6209,9 +6379,15 @@ if (missingFields.length > 0) {
                               size="small"
                               placeholder=".0000"
                               fullWidth
-                              defaultValue={UDFNumber_4}
+                              value={UDFNumber_4}
                               onChange={(e) => {
-                                setUDFNumber_4(e.target.value);
+                                
+                                handleNumericInputChange(e, setUDFNumber_4);
+                                setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -6226,9 +6402,16 @@ if (missingFields.length > 0) {
                               size="small"
                               placeholder=".0000"
                               fullWidth
-                              defaultValue={UDFNumber_5}
+                              value={UDFNumber_5}
+                             
                               onChange={(e) => {
-                                setUDFNumber_5(e.target.value);
+                                
+                                handleNumericInputChange(e, setUDFNumber_5);
+                                setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -6610,10 +6793,7 @@ if (missingFields.length > 0) {
                                 </IconButton>
                                 <DialogContent dividers>
                                   <Typography gutterBottom>
-                                    {console.log(
-                                      "selectedImage____",
-                                      selectedImage
-                                    )}
+                                    
                                     <img
                                       // src={selectedImage}
                                       src={
@@ -6700,7 +6880,7 @@ if (missingFields.length > 0) {
                           onClick={onClickCancel}
                           startIcon={<Iconify icon="jam:close" />}
                         >
-                          Close
+                          Cancel
                         </Button>
                       </div>
                     </Grid>
@@ -6811,7 +6991,7 @@ if (missingFields.length > 0) {
                         marginTop: "-30px",
                       }}
                     >
-                      {console.log("steps_____",steps)}
+                      
                       <StepContainer>
                         {steps.map(
                           ({

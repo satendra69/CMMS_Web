@@ -20,6 +20,10 @@ import TaxCodeList from "src/sections/master-file-setup/TaxCode/TaxCodeList";
 import BudgetList from "src/sections/master-file-setup/Budget/BudgetList";
 import BudgetADDDialog from "src/sections/master-file-setup/Budget/BudgetADDDialog";
 import DashboardSummary from "src/sections/overview/app/view/dashboard-summary";
+import EmployeList from "src/sections/people/employee/EmployeList";
+import EmployeForm from "src/sections/people/employee/Form/EmployeForm";
+import UserList from "src/sections/user_login/UserListView/UserList";
+import UserForm from "src/sections/user_login/Form/UserForm";
 
 // ----------------------------------------------------------------------
 
@@ -326,6 +330,30 @@ export const dashboardRoutes = [
           },
         ],
       },
+
+      {
+        path: "people",
+        children: [
+          { element: <EmployeList />, index: true },
+
+          { path: "employ-list", element: <EmployeList /> },
+          { path: "employe-new", element: <EmployeForm /> },
+          { path: "assetReport", element: <AssetListReport /> },
+          { path: "assetPrintQr", element: <AssetPrintQrCode /> },
+        ],
+      },
+
+      {
+        path: "user",
+        children: [
+          { element: <UserList />, index: true },
+
+          { path: "user-list", element: <UserList /> },
+          { path: "user-form", element: <UserForm/> },
+
+        ],
+      },
+
 
       { path: "file-manager", element: <FileManagerPage /> },
       { path: "mail", element: <MailPage /> },

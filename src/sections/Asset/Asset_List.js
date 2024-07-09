@@ -115,7 +115,13 @@ export default function Asset_List() {
   const [Headerdata, setheaderData] = useState([]);
 
   const [filters, setFilters] = useState(defaultFilters);
-  const [selectedOption, setSelectedOption] = useState('');
+
+
+const { selectedOption: returnedSelectedOption, comeBack } = location.state || {};
+const [selectedOption, setSelectedOption] = useState(returnedSelectedOption || '');
+const [selectedComeBack, setSelectedComeBack] = useState(comeBack || '');
+
+  //const [selectedOption, setSelectedOption] = useState('');
 
   const confirm = useBoolean();
 
@@ -163,6 +169,8 @@ export default function Asset_List() {
   const [QrCodeRowId, setQrCodeRowId] = useState("");
 
   const [QueryTitleRowId, setQueryTitleRowID] = useState("");
+  const [defaultTitle, setDefaultTitle] = useState('');
+  const [tempRowID, setTempRowID] = useState(null);
 
   const [showPromt, setShowPromt] = useState(false);
   const [rowsDropdownPrompt, setRowsDropdownPrompt] = useState([
@@ -179,26 +187,6 @@ export default function Asset_List() {
     },
   ]);
   
-  // Get Api data useEffect
-  
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    
-    try {
-      const response = await httpCommon.get(
-        `/get_asset_master_table_data.php?site_cd=${site_ID}&page=${currentPage}`
-      );
-     // console.log("response_____fetcha___",response);
-      setheaderData(response.data.data.header);
-      setTableData(response.data.data.result);
-      setTotalRow(response.data.total_count);
-     // Swal.close();
-      setIsLoading(false);
-    
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  }, [site_ID, currentPage]);
 
   const fetchFilterSubPopupSavedropdon = async () => {
     // Get dropdown value using api
@@ -238,7 +226,7 @@ export default function Asset_List() {
             emp_ID:emp_owner,
           }
         );
-        console.log("response_____using _dashbord",response);
+       //console.log("response_____using _dashbord",response);
         if (response.data.status === "SUCCESS") {
           if (response.data.data.result.length > 0) {
             setheaderData(response.data.data.header);
@@ -255,11 +243,132 @@ export default function Asset_List() {
       }
     }, [site_ID, currentPage]);
   
-  const handleOptionChange = async (event,responseData) => {
+  // Get Api data useEffect
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    
+    try {
+      const response = await httpCommon.get(
+        `/get_asset_master_table_data.php?site_cd=${site_ID}&page=${currentPage}`
+      );
+     // console.log("response_____fetcha___",response);
+     if(selectedOption === ""){
+
+      setheaderData(response.data.data.header);
+      setTableData(response.data.data.result);
+      setTotalRow(response.data.total_count);
+
+     }else{
+
+      setheaderData(response.data.data.header);
+
+     }
+    
+     // get Dropdown Title
+     const response2 = await httpCommon.get(
+      `/get_asset_filter_dropdown.php?site_cd=${site_ID}&auditUser=${AuditUser}`
+    );
+      if(selectedOption === ""){
+     const defaultItem = response2.data.find(item => item.cf_query_default_flag === "1");
+      if (defaultItem) {
+        setDefaultTitle(defaultItem.cf_query_title);
+        setselectDropRowID(defaultItem.RowID);
+      }
+    }else{
+      setDefaultTitle(selectedOption);
+    }
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }, [site_ID, currentPage]);
+
+  useEffect(() => {
+    if (defaultTitle) {
+
+      handleOptionTableList({ target: { value: defaultTitle }});
+
+    }
+  }, [defaultTitle,site_ID, currentPage]);
+  
+  const handleOptionTableList = async (event,responseData) => {
+    
     const selectedValue = event?.target?.value || selectedOption;
     
     setCurrentPage(1);
   
+    const selectedOptionObjectFilter = assetFilterDpd.find(
+      (item) => item.cf_query_title === selectedValue
+    );
+
+    if (selectedOptionObjectFilter) {
+      const GetRowID = selectedOptionObjectFilter.RowID;
+      const GetPrompt = selectedOptionObjectFilter.cf_query_list_prompt;
+      if (selectedComeBack === "" || selectedComeBack === undefined){
+        if(GetPrompt == '1'){
+          setShowPromt(true);
+          setIsLoading(true);
+         
+          try {
+            const response = await httpCommon.get(
+              "/get_work_order_filter_query_data.php?site_cd=" +
+                site_ID +
+                "&RowID=" +
+                GetRowID
+            );
+            
+            if (response.data.data && response.data.data.list_typeF && response.data.data.list_typeF.length > 0) {
+              const newRows = response.data.data.list_typeF.map((item) => ({
+                selectedOption: item.cf_query_list_column,
+                operator: item.cf_query_list_operator,
+                valuept: item.cf_query_list_value,
+                logical: item.cf_query_list_logical,
+                siteCd: site_ID,
+                RowId: GetRowID,
+                prompt:GetPrompt,
+                Column:item.customize_header,
+                queryTypedd: "F",
+              }));
+              const timeoutId = setTimeout(() => {
+                setIsLoading(false);
+                setRowsDropdownPrompt(newRows);
+              }, 3000);
+              //setShowAssetByDescp(false);
+            } else {
+              Swal.fire({
+                icon: "error",
+                customClass: {
+                  container: "swalcontainercustom",
+                },
+                title: "Oops...",
+                text: "No record found Please try again !",
+              });
+            }
+          } catch (error) {
+            console.error("Error fetching data:", error);
+          }
+          return;
+        }
+      }
+
+      setExportExcelId(GetRowID);
+      setselectDropRowID(GetRowID);
+      setCurrentPage(1);
+      setDropListIdGet([]);
+      setDashbordDataGauge([]);
+      setTitleAstReg("");
+    }
+    setSelectedOption(selectedValue);
+  };
+
+  const handleOptionChange = async (event,responseData) => {
+    const selectedValue = event?.target?.value || selectedOption;
+
+    setDefaultTitle("");
+    setSelectedComeBack("");
+    setCurrentPage(1);
+
     const selectedOptionObjectFilter = assetFilterDpd.find(
       (item) => item.cf_query_title === selectedValue
     );
@@ -275,16 +384,12 @@ export default function Asset_List() {
     if (selectedOptionObjectFilter) {
       const GetRowID = selectedOptionObjectFilter.RowID;
       const GetPrompt = selectedOptionObjectFilter.cf_query_list_prompt;
+
       if(GetPrompt == '1'){
         setShowPromt(true);
-        Swal.fire({
-          title: "Please Wait !",
-          allowOutsideClick: false,
-          customClass: {
-            container: "swalcontainercustom",
-          },
-        });
-        Swal.showLoading();
+        setTempRowID(GetRowID);
+        setIsLoading(true);
+  
         try {
           const response = await httpCommon.get(
             "/get_work_order_filter_query_data.php?site_cd=" +
@@ -305,12 +410,14 @@ export default function Asset_List() {
               Column:item.customize_header,
               queryTypedd: "F",
             }));
-            const timeoutId = setTimeout(() => {
-              Swal.close();
-              setRowsDropdownPrompt(newRows);
-            }, 3000);
+
+            setRowsDropdownPrompt(newRows);
+           
+            setSelectedOption(selectedValue);
             //setShowAssetByDescp(false);
           } else {
+            setIsLoading(false);
+            setSelectedOption(selectedValue);
             Swal.fire({
               icon: "error",
               customClass: {
@@ -322,9 +429,12 @@ export default function Asset_List() {
           }
         } catch (error) {
           console.error("Error fetching data:", error);
+        } finally {
+          setIsLoading(false); // Ensure the loader is stopped after data has been processed
         }
         return;
       }
+     
       setExportExcelId(GetRowID);
       setselectDropRowID(GetRowID);
       setCurrentPage(1);
@@ -335,30 +445,37 @@ export default function Asset_List() {
       const GetRowID = selectedOptionObject.RowID;
       setExportExcelId(GetRowID);
       setselectDropRowID(GetRowID);
+      setSelectedOption(selectedValue);
       setCurrentPage(1);
       setDropListIdGet([]);
       setDashbordDataGauge([]);
       setTitleAstReg("");
     }
-    setSelectedOption(selectedValue);
+   
+   // setSelectedOption(selectedValue);
+   setSelectedOption(selectedValue);
+   await new Promise((resolve) => setTimeout(resolve, 0));
   };
-  
+console.log("selectDropRowID_____",selectDropRowID);
+console.log("DefaultTitlee_____",defaultTitle);
   const getb = useCallback(async () => {
-  
+   // console.log("get___btn_____funcation___");
     setIsLoading(true);
     try {
      
       const response = await httpCommon.post(
         `/get_asset_list_selectoption_data.php?site_cd=${site_ID}&ItemID=${selectDropRowID}&page=${currentPage}&EmpId=${emp_owner}`
       );
-     //  console.log("check___api__data__",response);
+       // console.log("check___api__data__",response);
       if (
         response.data.data &&
         response.data.data.result &&
         response.data.data.result.length > 0
       ) {
+        
         setTableData(response.data.data.result);
         setTotalRow(response.data.DashbrdCount);
+
        // Swal.close();
         setIsLoading(false);
       } else {
@@ -379,6 +496,9 @@ export default function Asset_List() {
     }
   }, [site_ID, currentPage, selectDropRowID]);
 
+const fetchDataUsingRefreshBtn = useCallback(async () =>{
+     getb();
+}, [site_ID, currentPage, selectDropRowID]);
 
   const dataFiltered = applyFilter({
     inputData: Array.isArray(tableData) ? tableData : [],
@@ -405,16 +525,6 @@ export default function Asset_List() {
     },
     [table]
   );
-
-  // const handleDeleteRow = useCallback((id) => {
-  //   console.log("crow_______",id);
-  //   //   const deleteRow = tableData.filter((row) => row.id !== id);
-  //   //   setTableData(deleteRow);
-
-  //   //   table.onUpdatePageDeleteRow(dataInPage.length);
-  //    },
-  //   [dataInPage.length, table, tableData]
-  // );
 
   const handleDeleteRow = useCallback(async (id, row) => {
  
@@ -474,7 +584,7 @@ export default function Asset_List() {
       totalRowsFiltered: dataFiltered.length,
     });
   }, [dataFiltered.length, dataInPage.length, table, tableData]);
-
+  
   const handleEditRow = useCallback(
     (id,row) => {
 
@@ -883,14 +993,8 @@ export default function Asset_List() {
 
   const RetriveDataAllData = useCallback(async () => {
     
-    Swal.fire({
-      title: "Please Wait !",
-      allowOutsideClick: false,
-      customClass: {
-        container: "swalcontainercustom",
-      },
-    });
-    Swal.showLoading();
+    // Swal.showLoading();
+    setIsLoading(true);
     try {
       const response = await httpCommon.post(
         "/get_retrive_asset_all_data.php?page=" + currentPage,
@@ -899,7 +1003,7 @@ export default function Asset_List() {
           admin: emp_owner,
         }
       );
-     
+    // console.log("response____",response);
       if (
         response.data.data &&
         response.data.data.result &&
@@ -908,6 +1012,7 @@ export default function Asset_List() {
         setTableData(response.data.data.result);
         setTotalRow(response.data.total_count);
         setTitleAstReg(response.data.titleName);
+        setselectDropRowID(response.data.titleRowId);
         // setDefineQueryBtn("RetriveData");
      
         Swal.close();
@@ -925,6 +1030,8 @@ export default function Asset_List() {
       }
     } catch (error) {
       console.error("Error fetching data:", error);
+    }finally {
+      setIsLoading(false);
     }
   }, [site_ID, currentPage]);
 
@@ -1080,7 +1187,7 @@ export default function Asset_List() {
           InsertCf_queryListData();
         }
       } else {
-        console.log("empty__");
+      //  console.log("empty__");
       }
     };
   // Query button click to funcatio start
@@ -1197,7 +1304,7 @@ export default function Asset_List() {
           console.error("Error fetching data:", error);
         }
       } else {
-        console.log("empty");
+       // console.log("empty");
       }
     };
     const SaveWorkOrderQryList = async () => {
@@ -1214,7 +1321,7 @@ export default function Asset_List() {
             container: "swalcontainercustom",
           },
         });
-       // Swal.showLoading();
+        Swal.showLoading();
         const combinedData = {
           rowsQrtData: rowsQrt,
           siteCd: site_ID,
@@ -1229,12 +1336,12 @@ export default function Asset_List() {
             "/insert_asset_query_list_save_data.php",
             combinedData
           );
-            console.log("response__SaveBytncf__",response);
+          //  console.log("response__SaveBytncf__",response);
           if (response.data.status == "SUCCESS") {
             Swal.close();
             Swal.fire({
               title: "Success!",
-              text: "Your query update successfully.",
+              text: "Your Query Update Successfully.",
               icon: "success",
               confirmButtonText: "OK",
               customClass: {
@@ -1306,7 +1413,7 @@ export default function Asset_List() {
           InsertCf_queryListDataSavaAs();
         }
       } else {
-        console.log("empty__");
+      //  console.log("empty__");
       }
     };
     // fetch data using dropdon
@@ -1415,7 +1522,6 @@ const handleCheckboxClick = () => {
   
     setIsChecked(!isChecked);
 };
-
 
 const handleOptionChangeQtr = (index, selectedOption) => {
   const updatedRowsQtr = [...rowsQrt];
@@ -1544,7 +1650,7 @@ const handleInputValueChangeQtr2 = (index, newValue) => {
         "/insert_asset_query_list_save_as_data.php", 
         combinedData
       );
-      console.log("saveAsQuery_____",response);
+      //console.log("saveAsQuery_____",response);
       if (response.data.status == "SUCCESS") {
         setTitleAstReg(response.data.Title);
         fetchFilterSubPopupSavedropdon();
@@ -1787,6 +1893,7 @@ const fetchDataResponse = async (hasRowIdValuept) => {
 
 }
 
+
 const handleDropDownPromptSaveAsBtn = async () => {
   const hasEmptyValuept = rowsDropdownPrompt.some(row => !row.valuept.trim());
   const hasRowIdValuept = rowsDropdownPrompt.length > 0 ? rowsDropdownPrompt[0].RowId : null;
@@ -1826,20 +1933,8 @@ const handleDropDownPromptSaveAsBtn = async () => {
         
       if (response.data.status == "SUCCESS") {
         Swal.close();
-        Swal.fire({
-          title: "Success!",
-          text: "Your query update successfully.",
-          icon: "success",
-          confirmButtonText: "OK",
-          customClass: {
-            container: "swalcontainercustom",
-          },
-        }).then((result) => {
-          if (result.isConfirmed) {
-           
-            fetchDataResponse(hasRowIdValuept);
-          }
-        });
+        fetchDataResponse(hasRowIdValuept);
+        setselectDropRowID(tempRowID);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -1847,6 +1942,7 @@ const handleDropDownPromptSaveAsBtn = async () => {
   }
 
 };
+
 
 const fetchDataCallback = useCallback(fetchData, [site_ID, currentPage]);
 const getbCallback = useCallback(getb, [selectDropRowID]);
@@ -1863,26 +1959,28 @@ useEffect(() => {
      retriveDataCallback();
 
   }else if(Array.isArray(DashbordDataGauge) && DashbordDataGauge.length > 0){
-      console.log("Enter____here___");
+     // console.log("Enter____here___");
     fetchDataGaugeDSB();
 
  }else {
-
     fetchDataCallback();
   }
   fetchFilterSubPopupSavedropdon();
 }, [site_ID, currentPage, selectDropRowID, fetchDataCallback, getbCallback, retriveDataCallback,fetchDataGaugeDSB]);
 
 // Add Table Header Daynamic value pass
-const TABLE_HEAD = Headerdata.map((item, index) => {
-  const width = [115, 170, 120, 125, 150, 160,125,130,170,170,120,145,80,145,125,120,180,180,130,155,170,180,160,170,170,160,170,170,160,160,180,160,160,170,195,140,80,80,100,140,155,100,85,125,125,150,150,150,150,150,150,150,150,150,150,150,150,150,150,130][index]; 
+const TABLE_HEAD = Headerdata && Headerdata.map((item, index) => {
+  const width = [115, 170, 120, 125, 150, 160,125,130,200,250,120,145,80,145,125,120,180,180,130,155,170,180,160,170,170,160,170,170,160,160,180,160,160,170,195,140,80,80,100,140,155,100,85,125,125,150,150,150,150,150,150,150,150,150,150,150,150,150,150,130][index]; 
   return {
     id: item.accessor,
     label: item.Header,
     width
   };
 });
-TABLE_HEAD.unshift({ id: '', label: 'Action', width: 60 });
+//TABLE_HEAD.unshift({ id: '', label: 'Action', width: 60 });
+if (TABLE_HEAD) {
+  TABLE_HEAD.unshift({ id: '', label: 'Action', width: 60 });
+}
 
 
   return (
@@ -1894,7 +1992,7 @@ TABLE_HEAD.unshift({ id: '', label: 'Action', width: 60 });
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <div className="CustomBreadAsset">
           <CustomBreadcrumbs
-            heading="CMMS System"
+            heading="Asset List"
             links={[]}
             action={
               <Button
@@ -1982,7 +2080,7 @@ TABLE_HEAD.unshift({ id: '', label: 'Action', width: 60 });
               <Tooltip title="Refresh" placement="top" arrow >
                   <span
                     className="ListDataRefBtn"
-                    onClick={fetchData}
+                    onClick={fetchDataUsingRefreshBtn}
                     style={{ border: '0px' }}
                   >
                     <Icon icon="iconoir:refresh-double" style={{ width:'20px', height:'20px' }} /> 

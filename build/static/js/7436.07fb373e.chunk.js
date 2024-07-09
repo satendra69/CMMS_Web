@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[7436],{67436:(e,s,r)=>{r.r(s),r.d(s,{default:()=>l});var c=r(6907),t=r(41093),n=r(80184);function l(){return(0,n.jsxs)(n.Fragment,{children:[(0,n.jsx)(c.ql,{children:(0,n.jsx)("title",{children:" Dashboard: Product List"})}),(0,n.jsx)(t.Yf,{})]})}}}]);
-//# sourceMappingURL=7436.07fb373e.chunk.js.map

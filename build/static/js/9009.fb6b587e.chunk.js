@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[9009],{19009:(s,e,r)=>{r.r(e),r.d(e,{default:()=>l});var t=r(6907),c=r(4087),n=r(80184);function l(){return(0,n.jsxs)(n.Fragment,{children:[(0,n.jsx)(t.ql,{children:(0,n.jsx)("title",{children:" Dashboard: Post List"})}),(0,n.jsx)(c.Nr,{})]})}}}]);
-//# sourceMappingURL=9009.fb6b587e.chunk.js.map

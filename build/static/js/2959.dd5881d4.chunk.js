@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[2959],{52959:(e,s,n)=>{n.r(s),n.d(s,{default:()=>h});var r=n(6907),c=n(74007),t=n(80184);function h(){return(0,t.jsxs)(t.Fragment,{children:[(0,t.jsx)(r.ql,{children:(0,t.jsx)("title",{children:" Foundations: Typography"})}),(0,t.jsx)(c.hv,{})]})}}}]);
-//# sourceMappingURL=2959.dd5881d4.chunk.js.map

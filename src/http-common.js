@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export default axios.create({
-  // baseURL: "http://evantage.ddns.net/react_web/", 
-  baseURL: "https://evantage-cmms.com.my/cmms_ktmb/Api", 
+   baseURL: "http://evantage.ddns.net/react_web/", 
+  // baseURL: "https://evantage-cmms.com.my/cmms_ktmb/Api", 
  // baseURL: "https://evantage-cmms.com.my/react_web",
   // baseURL: "http://evantage.ddns.net/React_helpDesk_web/",
   // baseURL: "http://192.168.0.34:8080/react_web/",

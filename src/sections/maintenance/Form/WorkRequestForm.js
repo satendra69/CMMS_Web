@@ -1,11 +1,8 @@
 import PropTypes from "prop-types";
 import React, { useState, useEffect, useRef } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { styled } from "@mui/material/styles";
 import { Helmet } from "react-helmet-async";
 // @mui
-import LoadingButton from "@mui/lab/LoadingButton";
 import Autocomplete from "@mui/material/Autocomplete";
 import Container from "@mui/material/Container";
 // @bootstrap
@@ -28,10 +25,9 @@ import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import Switch from "@mui/material/Switch";
+
 import Grid from "@mui/material/Unstable_Grid2";
 
-import Checkbox from "@mui/material/Checkbox";
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Toastfy
@@ -115,7 +111,7 @@ export default function WorkRequestForm({ currentUser }) {
   //const Ast_no = searchParams.get("ast_no");
 
   const state = location.state || {};
-  const { RowID, Ast_no} = state || {};
+  const { RowID, WorkReqNo, currentPage, selectedOption} = state || {};
 
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -284,6 +280,7 @@ export default function WorkRequestForm({ currentUser }) {
     const StatushandleClose = () => setStatusShow(false);
   
     const [StatusShow, setStatusShow] = useState(false);
+    const [isFormFiled, setIsFormFiled] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -485,7 +482,6 @@ export default function WorkRequestForm({ currentUser }) {
       if (responseJson.data.status === "SUCCESS") {
         // **************************************** check read data ******************************************
         
-
         for (var index in responseJson.data.data) {
           //  setRowID(responseJson.data.data[index].RowID)
           setWorkRequestNo(responseJson.data.data[index].wkr_mst_wr_no);
@@ -510,10 +506,14 @@ export default function WorkRequestForm({ currentUser }) {
             setOriginationDate(formattedDate);
           }
 
-          setSelected_FaultCode({
-            label: responseJson.data.data[index].wkr_mst_fault_code + " : " + responseJson.data.data[index].wkr_mst_wr_descs,
-          
-          });
+          if (responseJson.data.data[index].wkr_mst_fault_code == null) {
+            setSelected_FaultCode("");
+          } else {
+            setSelected_FaultCode({
+              label: responseJson.data.data[index].wkr_mst_fault_code + " : " + responseJson.data.data[index].fault_desc,
+            });
+          }
+         
 
           if (responseJson.data.data[index].wkr_mst_due_date == null) {
             setDueDate("");
@@ -784,14 +784,29 @@ export default function WorkRequestForm({ currentUser }) {
   };
 
   const handleSelectedFaultCode = (selectedOption) => {
+
     setSelected_FaultCode(selectedOption);
-    // console.log(selectedOption.value);
+   
     if (selectedOption) {
-      setDescription(selectedOption.value);
+
+      //setDescription(selectedOption.value);
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to overwrite the description?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, overwrite it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setDescription(selectedOption.value);
+        }
+      });
     } else {
-      setDescription(""); // Handle the case where selectedOption is null or undefined
+      //setDescription("");
     }
-    // setDescription(selectedOption.value);
+    
   };
 
   // Thired Api Call
@@ -992,8 +1007,48 @@ export default function WorkRequestForm({ currentUser }) {
   };
   //get WorkOrderAssetNo onther component
 
-  const onClickCancel = () => {
-    navigate(`/dashboard/work/list`);
+  const onClickCancel = (event) => {
+    event.preventDefault();
+    if (isFormFiled) {
+      Swal.fire({
+        title: "Discard changes?",
+        icon: "warning",
+        showDenyButton: true,
+        showCancelButton: true,
+        allowOutsideClick: false,
+        customClass: {
+          container: "swalcontainercustom",
+        },
+        confirmButtonText: "Yes",
+        denyButtonText: `No`,
+        focusCancel: true 
+      }).then((result) => {
+        
+        if (result.isConfirmed) {
+        
+         onClickChange(event);
+        } else if (result.isDenied) {
+            navigate(`/dashboard/work/list`, {
+              state: {
+                currentPage,
+                selectedOption,
+                comeBack:"Come_Back_cancel",
+              },
+            });
+          setIsFormFiled(false);
+        }
+      });
+    }else{
+      navigate(`/dashboard/work/list`, {
+        state: {
+          currentPage,
+          selectedOption,
+          comeBack:"Come_Back_cancel",
+        },
+      });
+    }
+
+   
   };
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
@@ -1322,8 +1377,8 @@ export default function WorkRequestForm({ currentUser }) {
       wkr_mst_create_date: get_date,
       cnt_mst_numbering: AutoNumring,
     };
+    
     console.log("json_workrequest____",json_workrequest);
-
    // console.log("WorkReqMandatoryFiled____",WorkReqMandatoryFiled);
 
     for (let i = 0; i < WorkReqMandatoryFiled.length; i++) {
@@ -1350,7 +1405,7 @@ export default function WorkRequestForm({ currentUser }) {
         "/insert_new_workrequest.php",
         JSON.stringify(json_workrequest)
       );
-   //  console.log("response____word_req__",response);
+     console.log("response____word_req__",response);
       if (response.data.status === "SUCCESS") {
         Swal.close();
         Swal.fire({
@@ -1669,7 +1724,6 @@ export default function WorkRequestForm({ currentUser }) {
       //console.log("Date9 ", date_9);
     }
 
-
     let missingFields = [];
 
     var json_updateworkrequest = {
@@ -1687,7 +1741,7 @@ export default function WorkRequestForm({ currentUser }) {
       wkr_mst_assetno: setAsset_No.trim(),
       wkr_mst_chg_costcenter: setChargeCost_Center.trim(),
       wkr_mst_work_area: setWork_Area.trim(),
-      wkr_mst_work_group: Work_Group[0].trim(),
+      wkr_mst_work_group: setWork_Group.trim(),
       wkr_mst_assetlocn: setAsset_Location.trim(),
       wkr_mst_work_type: setWorkType.trim(),
       wkr_mst_location: setLevel.trim(),
@@ -1750,7 +1804,9 @@ export default function WorkRequestForm({ currentUser }) {
       wkr_mst_create_date: get_date,
       RowID: RowID,
     };
-   // console.log("json_workrequest_update",json_updateworkrequest);
+
+    console.log("json_workrequest_update",json_updateworkrequest);
+
     for (let i = 0; i < WorkReqMandatoryFiled.length; i++) {
       const item = WorkReqMandatoryFiled[i];
       const fieldValue = json_updateworkrequest[item.column_name];
@@ -1805,7 +1861,14 @@ export default function WorkRequestForm({ currentUser }) {
                 title: response.data.status,
                 text: response.data.message,
               }).then(() => {
-                navigate(`/dashboard/work/list`);
+             
+                navigate(`/dashboard/work/list`, {
+                  state: {
+                    currentPage,
+                    selectedOption,
+                    comeBack:"Come_Back_cancel",
+                  },
+                });
               });
             }
           } catch (error) {
@@ -1820,7 +1883,14 @@ export default function WorkRequestForm({ currentUser }) {
             text: response.data.message,
           }).then(() => {
             if (response.data.status === "SUCCESS") {
-              navigate(`/dashboard/work/list`);
+             
+              navigate(`/dashboard/work/list`, {
+                state: {
+                  currentPage,
+                  selectedOption,
+                  comeBack:"Come_Back_cancel",
+                },
+              });
             }
             
           });
@@ -1996,6 +2066,22 @@ export default function WorkRequestForm({ currentUser }) {
             return '';
     }
 };
+const handleNumericInputChange = (e, setterFunction) => {
+  let { value } = e.target;
+  value = value.replace(/[^\d.]/g, ''); // Remove non-numeric characters except decimal
+  value = value.slice(0, 16); // Limit to 16 characters including decimals and commas
+
+  const parts = value.split('.');
+  let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  if (integerPart.length > 11) {
+    integerPart = integerPart.slice(0, 12) + '.' + integerPart.slice(12, 16);
+  }
+  let decimalPart = parts[1] ? parts[1].slice(0, 4) : '';
+
+  const formattedValue = decimalPart ? `${integerPart}.${decimalPart}` : integerPart;
+  setterFunction(formattedValue); // Set the state for the respective UDFNumber state
+  setErrorField(null);
+};
   return (
     <>
      <Helmet>
@@ -2022,7 +2108,7 @@ export default function WorkRequestForm({ currentUser }) {
           <CustomBreadcrumbs
             heading={
               RowID
-                ? `Update ${WorkRequestNo? WorkRequestNo: ""} Work Request`
+                ? `Edit ${WorkRequestNo? WorkRequestNo: ""} Work Request`
                 : "Create New Work Request"
             }
             links={[
@@ -2045,14 +2131,6 @@ export default function WorkRequestForm({ currentUser }) {
                         color: "white",
                         marginRight: "10px",
                       }}
-                      // disabled={Status.some(
-                      //   (item) =>
-                      //     item.key ===
-                      //       (
-                      //         selected_Status?.label?.split(" : ")[2] ?? ""
-                      //       ).trim() && item.key === "CLOSE"
-                      // )}
-                    
                       disabled={ApprovalStatus && ApprovalStatus === "A" || ApprovalStatus === "D"}
                     >
                       {Button_save}
@@ -2063,7 +2141,7 @@ export default function WorkRequestForm({ currentUser }) {
                       startIcon={<Iconify icon="jam:close" />}
                       onClick={onClickCancel}
                     >
-                      Close
+                      Cancel
                     </Button>
                       </div>
               </div>
@@ -2247,7 +2325,7 @@ export default function WorkRequestForm({ currentUser }) {
                             name="name"
                             size="small"
                             disabled
-                            defaultValue={WorkRequestNo}
+                            value={WorkRequestNo}
                             className="ExtrasizeDisable"
                           />
                         </Stack>
@@ -2296,10 +2374,11 @@ export default function WorkRequestForm({ currentUser }) {
                         
                           <Autocomplete
                             options={Originator}
-                            defaultValue={selected_Originator ? selected_Originator.label : ''}
+                            value={selected_Originator ? selected_Originator.label : ''}
                             onChange={(event, value) => {
                               setSelected_Originator(value);
                               setErrorField(null); 
+                              setIsFormFiled(true);
                             }}
                             renderInput={(params) => (
                               <div>
@@ -2325,10 +2404,11 @@ export default function WorkRequestForm({ currentUser }) {
                           
                           <Autocomplete
                             options={OriginalPriority}
-                            defaultValue={selected_OriginalPriority ? selected_OriginalPriority.label : ''}
+                            value={selected_OriginalPriority ? selected_OriginalPriority.label : ''}
                             onChange={(event, value) => {
                               setSelected_OriginalPriority(value);
                               setIsOriginalPriorityEmpty(false);
+                              setIsFormFiled(true);
                             }}
                             renderInput={(params) => (
                               <div>
@@ -2361,10 +2441,15 @@ export default function WorkRequestForm({ currentUser }) {
                             variant="outlined"
                             className={errorField === "wkr_mst_phone" ? "erroBorderadd" : "Extrasize"}
                             fullWidth
-                            defaultValue={Phone}
+                            value={Phone}
                             onChange={(e) => {
-                              setPhone(e.target.value);
+                             
+                              const value = e.target.value;
+                              if (value.length <= 20) {
+                                setPhone(value);
+                              }
                               setErrorField(null); 
+                              setIsFormFiled(true);
                             }}
                           />
                         </Stack>
@@ -2381,6 +2466,7 @@ export default function WorkRequestForm({ currentUser }) {
                             onChange={(newDate) => {
                               setOriginationDate(newDate); // Update your state with the new value
                               setErrorField(null); 
+                              setIsFormFiled(true);
                             }}
                             slotProps={{
                               textField: {
@@ -2397,10 +2483,11 @@ export default function WorkRequestForm({ currentUser }) {
                           </Typography>
                           <Autocomplete
                             options={FaultCode}
-                            defaultValue={selected_FaultCode ? selected_FaultCode.label : ''}
+                            value={selected_FaultCode ? selected_FaultCode.label : ''}
                             onChange={(event, value) => {
                               handleSelectedFaultCode(value);
                               setErrorField(null); 
+                              setIsFormFiled(true);
                             }}
                             renderInput={(params) => (
                               <div>
@@ -2428,6 +2515,7 @@ export default function WorkRequestForm({ currentUser }) {
                             onChange={(newDate) => {
                               setDueDate(newDate); // Update your state with the new value
                               setErrorField(null); 
+                              setIsFormFiled(true);
                             }}
                             slotProps={{
                               textField: {
@@ -2447,17 +2535,17 @@ export default function WorkRequestForm({ currentUser }) {
 
                           <TextareaAutosize
                             aria-label="empty textarea"
-                            placeholder={
-                              findCustomizeLabel("wkr_mst_wr_descs") ||
-                              "Description"
-                            }
-
+                          
                             style={{ width: "100%" }}
                             minRows={6.5}
-                            defaultValue={Description}
+                            value={Description}
                             onChange={(e) => {
-                              setDescription(e.target.value);
+                              const value = e.target.value;
+                              if (value.length <= 2000) {
+                                setDescription(value);
+                              }
                               setIsdescriptionEmpty(false);
+                              setIsFormFiled(true);
                               
                             }}
                           
@@ -2642,7 +2730,7 @@ export default function WorkRequestForm({ currentUser }) {
                       value={Tabvalue}
                       onChange={handleChange}
                       aria-label="Basic tabs"
-                      defaultValue={0}
+                      //value={0}
                     >
                       <Tab
                         label={
@@ -2727,10 +2815,11 @@ export default function WorkRequestForm({ currentUser }) {
                             </Typography>
                             <Autocomplete
                               options={Asset_No}
-                              defaultValue={selected_Asset_No ? selected_Asset_No.label : ''} 
+                              value={selected_Asset_No ? selected_Asset_No.label : ''} 
                               onChange={(event, value) => {
                                 handleSelectedAssetNo(value);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               renderInput={(params) => (
                                 <div>
@@ -2756,10 +2845,11 @@ export default function WorkRequestForm({ currentUser }) {
                             </Typography>
                             <Autocomplete
                               options={Charge_Cost_Center}
-                              defaultValue={selected_Charge_Cost_Center ? selected_Charge_Cost_Center.label : ''}
+                              value={selected_Charge_Cost_Center ? selected_Charge_Cost_Center.label : ''}
                               onChange={(event, value) => {
                                 setSelected_Charge_Cost_Center(value);
                                 setIsChargeCostCenterEmpty(false);
+                                setIsFormFiled(true);
                               }}
                               renderInput={(params) => (
                                 <div>
@@ -2787,10 +2877,11 @@ export default function WorkRequestForm({ currentUser }) {
                             </Typography>
                             <Autocomplete
                               options={Work_Area}
-                              defaultValue={selected_Work_Area ? selected_Work_Area.label : ''}
+                              value={selected_Work_Area ? selected_Work_Area.label : ''}
                               onChange={(event, value) => {
                                 setSelected_Work_Area(value);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               renderInput={(params) => (
                                 <div>
@@ -2815,10 +2906,11 @@ export default function WorkRequestForm({ currentUser }) {
                             </Typography>
                             <Autocomplete
                               options={Work_Group}
-                              defaultValue={selected_Work_Group ? selected_Work_Group.label : ''}
+                              value={selected_Work_Group ? selected_Work_Group.label : ''}
                               onChange={(event, value) => {
                                 setSelected_Work_Group(value);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               renderInput={(params) => (
                                 <div>
@@ -2842,10 +2934,11 @@ export default function WorkRequestForm({ currentUser }) {
                             </Typography>
                             <Autocomplete
                               options={Asset_Location}
-                              defaultValue={selected_Asset_Location ? selected_Asset_Location.label : ''}
+                              value={selected_Asset_Location ? selected_Asset_Location.label : ''}
                               onChange={(event, value) => {
                                 setSelected_Asset_Location(value);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               renderInput={(params) => (
                                 <div>
@@ -2871,10 +2964,11 @@ export default function WorkRequestForm({ currentUser }) {
                             
                             <Autocomplete
                               options={WorkType}
-                              defaultValue={selected_WorkType ? selected_WorkType.label : ''}
+                              value={selected_WorkType ? selected_WorkType.label : ''}
                               onChange={(event, value) => {
                                 setSelected_WorkType(value);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               renderInput={(params) => (
                                 <div>
@@ -2899,10 +2993,11 @@ export default function WorkRequestForm({ currentUser }) {
                             <Autocomplete
                               options={Level}
                               
-                              defaultValue={selected_Level ? selected_Level.label : ''}
+                              value={selected_Level ? selected_Level.label : ''}
                               onChange={(event, value) => {
                                 setSelected_Level(value);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               renderInput={(params) => (
                                 <div>
@@ -2927,10 +3022,11 @@ export default function WorkRequestForm({ currentUser }) {
                             </Typography>
                             <Autocomplete
                               options={WorkClass}
-                              defaultValue={selected_WorkClass ? selected_WorkClass.label : ''}
+                              value={selected_WorkClass ? selected_WorkClass.label : ''}
                               onChange={(event, value) => {
                                 setSelected_WorkClass(value);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               renderInput={(params) => (
                                 <div>
@@ -2954,10 +3050,11 @@ export default function WorkRequestForm({ currentUser }) {
                             </Typography>
                             <Autocomplete
                               options={ProjectID}
-                              defaultValue={selected_ProjectID ? selected_ProjectID.label : ''}
+                              value={selected_ProjectID ? selected_ProjectID.label : ''}
                               onChange={(event, value) => {
                                 setSelected_ProjectID(value);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               renderInput={(params) => (
                                 <div>
@@ -2981,14 +3078,18 @@ export default function WorkRequestForm({ currentUser }) {
                             </Typography>
                             <TextareaAutosize
                               aria-label="empty textarea"
-                              placeholder="Note1"
-                              defaultValue={UDFNote1}
+                              
+                              value={UDFNote1}
                               minRows={6.5}
                               className={errorField === "wkr_det_note1" ? "erroBorderadd" : "TxtAra"}
                               style={{ width: "100%" }} // Make it full-width
                               onChange={(e) => {
-                                setUDFNote1(e.target.value);
+                                const value = e.target.value;
+                                if (value.length <= 1000) {
+                                  setUDFNote1(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3004,10 +3105,15 @@ export default function WorkRequestForm({ currentUser }) {
                               variant="outlined"
                               className={errorField === "wkr_det_varchar1" ? "erroBorderadd" : "Extrasize"}
                               fullWidth
-                              defaultValue={UDFText_1}
+                              value={UDFText_1}
                               onChange={(e) => {
-                                setUDFText_1(e.target.value);
+                             
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_1(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3021,10 +3127,15 @@ export default function WorkRequestForm({ currentUser }) {
                               variant="outlined"
                               className={errorField === "wkr_det_varchar2" ? "erroBorderadd" : "Extrasize"}
                               fullWidth
-                              defaultValue={UDFText_2}
+                              value={UDFText_2}
                               onChange={(e) => {
-                                setUDFText_2(e.target.value);
+                               
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_2(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3038,10 +3149,15 @@ export default function WorkRequestForm({ currentUser }) {
                               variant="outlined"
                               className={errorField === "wkr_det_varchar3" ? "erroBorderadd" : "Extrasize"}
                               fullWidth
-                              defaultValue={UDFText_3}
+                              value={UDFText_3}
                               onChange={(e) => {
-                                setUDFText_3(e.target.value);
+
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_3(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3055,10 +3171,14 @@ export default function WorkRequestForm({ currentUser }) {
                              variant="outlined"
                              className={errorField === "wkr_det_varchar4" ? "erroBorderadd" : "Extrasize"}
                              fullWidth
-                              defaultValue={UDFText_4}
+                              value={UDFText_4}
                               onChange={(e) => {
-                                setUDFText_4(e.target.value);
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_4(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3072,10 +3192,15 @@ export default function WorkRequestForm({ currentUser }) {
                              variant="outlined"
                              className={errorField === "wkr_det_varchar5" ? "erroBorderadd" : "Extrasize"}
                              fullWidth
-                              defaultValue={UDFText_5}
+                              value={UDFText_5}
                               onChange={(e) => {
-                                setUDFText_5(e.target.value);
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_5(value);
+                                }
+                               
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3089,10 +3214,15 @@ export default function WorkRequestForm({ currentUser }) {
                              variant="outlined"
                              className={errorField === "wkr_det_varchar6" ? "erroBorderadd" : "Extrasize"}
                              fullWidth
-                              defaultValue={UDFText_6}
+                              value={UDFText_6}
                               onChange={(e) => {
-                                setUDFText_6(e.target.value);
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_6(value);
+                                }
+                               
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3106,10 +3236,15 @@ export default function WorkRequestForm({ currentUser }) {
                              variant="outlined"
                              className={errorField === "wkr_det_varchar7" ? "erroBorderadd" : "Extrasize"}
                              fullWidth
-                              defaultValue={UDFText_7}
+                              value={UDFText_7}
                               onChange={(e) => {
-                                setUDFText_7(e.target.value);
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_7(value);
+                                }
+                              
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3125,10 +3260,14 @@ export default function WorkRequestForm({ currentUser }) {
                                 variant="outlined"
                                 className={errorField === "wkr_det_varchar8" ? "erroBorderadd" : "Extrasize"}
                                 fullWidth
-                                defaultValue={UDFText_8}
+                                value={UDFText_8}
                                 onChange={(e) => {
-                                  setUDFText_8(e.target.value);
+                                const value = e.target.value;
+                                  if (value.length <= 100) {
+                                    setUDFText_8(value);
+                                  }
                                   setErrorField(null); 
+                                  setIsFormFiled(true);
                                 }}
                               />
                             </Stack>
@@ -3142,10 +3281,15 @@ export default function WorkRequestForm({ currentUser }) {
                              variant="outlined"
                              className={errorField === "wkr_det_varchar9" ? "erroBorderadd" : "Extrasize"}
                              fullWidth
-                              defaultValue={UDFText_9}
+                              value={UDFText_9}
                               onChange={(e) => {
-                                setUDFText_9(e.target.value);
+                                const value = e.target.value;
+                                  if (value.length <= 100) {
+                                    setUDFText_9(value);
+                                  }
+                                
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3159,10 +3303,16 @@ export default function WorkRequestForm({ currentUser }) {
                               variant="outlined"
                               className={errorField === "wkr_det_varchar10" ? "erroBorderadd" : "Extrasize"}
                               fullWidth
-                              defaultValue={UDFText_10}
+                              value={UDFText_10}
                               onChange={(e) => {
-                                setUDFText_10(e.target.value);
+                               
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_10(value);
+                                }
+                                
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3177,10 +3327,15 @@ export default function WorkRequestForm({ currentUser }) {
                               className={errorField === "wkr_det_numeric1" ? "erroBorderadd" : "Extrasize"}
                               fullWidth
                                placeholder=".0000"
-                              defaultValue={UDFNumber_1}
+                              value={UDFNumber_1}
                               onChange={(e) => {
-                                setUDFNumber_1(e.target.value);
+                                
+                                handleNumericInputChange(e, setUDFNumber_1);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -3195,10 +3350,15 @@ export default function WorkRequestForm({ currentUser }) {
                               className={errorField === "wkr_det_numeric2" ? "erroBorderadd" : "Extrasize"}
                               fullWidth
                                placeholder=".0000"
-                              defaultValue={UDFNumber_2}
+                              value={UDFNumber_2}
                               onChange={(e) => {
-                                setUDFNumber_2(e.target.value);
+                                
+                                handleNumericInputChange(e, setUDFNumber_2);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -3213,10 +3373,14 @@ export default function WorkRequestForm({ currentUser }) {
                               className={errorField === "wkr_det_numeric3" ? "erroBorderadd" : "Extrasize"}
                               fullWidth
                                placeholder=".0000"
-                              defaultValue={UDFNumber_3}
+                              value={UDFNumber_3}
                               onChange={(e) => {
-                                setUDFNumber_3(e.target.value);
+                                handleNumericInputChange(e, setUDFNumber_3);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -3231,10 +3395,15 @@ export default function WorkRequestForm({ currentUser }) {
                              className={errorField === "wkr_det_numeric4" ? "erroBorderadd" : "Extrasize"}
                              fullWidth
                               placeholder=".0000"
-                              defaultValue={UDFNumber_4}
+                              value={UDFNumber_4}
                               onChange={(e) => {
-                                setUDFNumber_4(e.target.value);
+                               
+                                handleNumericInputChange(e, setUDFNumber_4);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -3251,10 +3420,15 @@ export default function WorkRequestForm({ currentUser }) {
                               className={errorField === "wkr_det_numeric5" ? "erroBorderadd" : "Extrasize"}
                               fullWidth
                                placeholder=".0000"
-                              defaultValue={UDFNumber_5}
+                              value={UDFNumber_5}
                               onChange={(e) => {
-                                setUDFNumber_5(e.target.value);
+                                
+                                handleNumericInputChange(e, setUDFNumber_5);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -3271,6 +3445,7 @@ export default function WorkRequestForm({ currentUser }) {
                               onChange={(newDate) => {
                                 setUDFDate_1(newDate); // Update your state with the new value
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               slotProps={{
                                 textField: {
@@ -3292,6 +3467,7 @@ export default function WorkRequestForm({ currentUser }) {
                               onChange={(newDate) => {
                                 setUDFDate_2(newDate); // Update your state with the new value
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               slotProps={{
                                 textField: {
@@ -3312,7 +3488,8 @@ export default function WorkRequestForm({ currentUser }) {
                               className={errorField === "wkr_det_datetime3" ? "erroBorderadd" : "Extrasize"}
                               onChange={(newDate) => {
                                 setUDFDate_3(newDate); // Update your state with the new value
-                                setErrorField(null); 
+                                setErrorField(null);
+                                setIsFormFiled(true); 
                               }}
                               slotProps={{
                                 textField: {
@@ -3334,6 +3511,7 @@ export default function WorkRequestForm({ currentUser }) {
                               onChange={(newDate) => {
                                 setUDFDate_4(newDate); // Update your state with the new value
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               slotProps={{
                                 textField: {
@@ -3356,6 +3534,7 @@ export default function WorkRequestForm({ currentUser }) {
                               onChange={(newDate) => {
                                 setUDFDate_5(newDate); // Update your state with the new value
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               slotProps={{
                                 textField: {
@@ -3384,17 +3563,19 @@ export default function WorkRequestForm({ currentUser }) {
                             </Typography>
                             <TextareaAutosize
                               aria-label="empty textarea"
-                              placeholder={
-                                findCustomizeLabelDet("wkr_det_note2") ||
-                                "Note2"
-                              }
+                             
                               minRows={6.5}
                               className={errorField === "wkr_det_note2" ? "erroBorderadd" : "TxtAra"} 
                               style={{ width: "100%" }} // Make it full-width
-                              defaultValue={UDFNote2}
+                              value={UDFNote2}
                               onChange={(e) => {
-                                setUDFNote2(e.target.value);
+                              
+                                const value = e.target.value;
+                                if (value.length <= 1000) {
+                                  setUDFNote2(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3410,10 +3591,15 @@ export default function WorkRequestForm({ currentUser }) {
                              size="small"
                              variant="outlined"
                              className={errorField === "wkr_det_varchar11" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFText_11}
+                              value={UDFText_11}
                               onChange={(e) => {
-                                setUDFText_11(e.target.value);
+                               
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_11(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3426,10 +3612,15 @@ export default function WorkRequestForm({ currentUser }) {
                               size="small"
                               variant="outlined"
                               className={errorField === "wkr_det_varchar12" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFText_12}
+                              value={UDFText_12}
                               onChange={(e) => {
-                                setUDFText_12(e.target.value);
+                                
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_12(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3442,10 +3633,15 @@ export default function WorkRequestForm({ currentUser }) {
                               size="small"
                               variant="outlined"
                               className={errorField === "wkr_det_varchar13" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFText_13}
+                              value={UDFText_13}
                               onChange={(e) => {
-                                setUDFText_13(e.target.value);
+                              
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_13(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3458,10 +3654,15 @@ export default function WorkRequestForm({ currentUser }) {
                               size="small"
                               variant="outlined"
                               className={errorField === "wkr_det_varchar14" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFText_14}
+                              value={UDFText_14}
                               onChange={(e) => {
-                                setUDFText_14(e.target.value);
+                               
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_14(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3474,10 +3675,15 @@ export default function WorkRequestForm({ currentUser }) {
                               size="small"
                               variant="outlined"
                               className={errorField === "wkr_det_varchar15" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFText_15}
+                              value={UDFText_15}
                               onChange={(e) => {
-                                setUDFText_15(e.target.value);
+                                
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_15(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3490,10 +3696,15 @@ export default function WorkRequestForm({ currentUser }) {
                              size="small"
                              variant="outlined"
                              className={errorField === "wkr_det_varchar16" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFText_16}
+                              value={UDFText_16}
                               onChange={(e) => {
-                                setUDFText_16(e.target.value);
+                               
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_16(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3506,10 +3717,15 @@ export default function WorkRequestForm({ currentUser }) {
                              size="small"
                              variant="outlined"
                              className={errorField === "wkr_det_varchar17" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFText_17}
+                              value={UDFText_17}
                               onChange={(e) => {
-                                setUDFText_17(e.target.value);
+                                
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_17(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3524,10 +3740,15 @@ export default function WorkRequestForm({ currentUser }) {
                               size="small"
                               variant="outlined"
                               className={errorField === "wkr_det_varchar18" ? "erroBorderadd" : "Extrasize"}
-                                defaultValue={UDFText_18}
+                                value={UDFText_18}
                                 onChange={(e) => {
-                                  setUDFText_18(e.target.value);
+                                  
+                                  const value = e.target.value;
+                                  if (value.length <= 100) {
+                                    setUDFText_18(value);
+                                  }
                                   setErrorField(null); 
+                                  setIsFormFiled(true);
                                 }}
                               />
                           </Stack>
@@ -3540,10 +3761,15 @@ export default function WorkRequestForm({ currentUser }) {
                               size="small"
                               variant="outlined"
                               className={errorField === "wkr_det_varchar19" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFText_19}
+                              value={UDFText_19}
                               onChange={(e) => {
-                                setUDFText_19(e.target.value);
+                               
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_19(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3556,10 +3782,15 @@ export default function WorkRequestForm({ currentUser }) {
                             size="small"
                             variant="outlined"
                             className={errorField === "wkr_det_varchar20" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFText_20}
+                              value={UDFText_20}
                               onChange={(e) => {
-                                setUDFText_20(e.target.value);
+                               
+                                const value = e.target.value;
+                                if (value.length <= 100) {
+                                  setUDFText_20(value);
+                                }
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                             />
                           </Stack>
@@ -3572,11 +3803,16 @@ export default function WorkRequestForm({ currentUser }) {
                               size="small"
                               variant="outlined"
                               className={errorField === "wkr_det_numeric6" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFNumber_6}
+                              value={UDFNumber_6}
                               placeholder=".0000"
                               onChange={(e) => {
-                                setUDFNumber_6(e.target.value);
+                              
+                                handleNumericInputChange(e, setUDFNumber_6);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -3589,11 +3825,16 @@ export default function WorkRequestForm({ currentUser }) {
                              size="small"
                              variant="outlined"
                              className={errorField === "wkr_det_numeric7" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFNumber_7}
+                              value={UDFNumber_7}
                               placeholder=".0000"
                               onChange={(e) => {
-                                setUDFNumber_7(e.target.value);
+                              
+                                handleNumericInputChange(e, setUDFNumber_7);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -3606,11 +3847,16 @@ export default function WorkRequestForm({ currentUser }) {
                               size="small"
                               variant="outlined"
                               className={errorField === "wkr_det_numeric8" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFNumber_8}
+                              value={UDFNumber_8}
                               placeholder=".0000"
                               onChange={(e) => {
-                                setUDFNumber_8(e.target.value);
+                              
+                                handleNumericInputChange(e, setUDFNumber_8);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -3623,11 +3869,16 @@ export default function WorkRequestForm({ currentUser }) {
                              size="small"
                              variant="outlined"
                              className={errorField === "wkr_det_numeric9" ? "erroBorderadd" : "Extrasize"}
-                              defaultValue={UDFNumber_9}
+                              value={UDFNumber_9}
                               placeholder=".0000"
                               onChange={(e) => {
-                                setUDFNumber_9(e.target.value);
+                               
+                                handleNumericInputChange(e, setUDFNumber_9);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
+                              }}
+                              InputProps={{
+                                inputProps: { style: { textAlign: 'right' } }
                               }}
                             />
                           </Stack>
@@ -3642,11 +3893,16 @@ export default function WorkRequestForm({ currentUser }) {
                                 size="small"
                                 variant="outlined"
                                 className={errorField === "wkr_det_numeric10" ? "erroBorderadd" : "Extrasize"}
-                                defaultValue={UDFNumber_10}
+                                value={UDFNumber_10}
                                 placeholder=".0000"
                                 onChange={(e) => {
-                                  setUDFNumber_10(e.target.value);
+                                //  setUDFNumber_10(e.target.value);
+                                  handleNumericInputChange(e, setUDFNumber_10);
                                   setErrorField(null); 
+                                  setIsFormFiled(true);
+                                }}
+                                InputProps={{
+                                  inputProps: { style: { textAlign: 'right' } }
                                 }}
                               />
                               </Stack>
@@ -3663,6 +3919,7 @@ export default function WorkRequestForm({ currentUser }) {
                                   onChange={(newDate) => {
                                     setUDFDate_6(newDate); // Update your state with the new value
                                     setErrorField(null); 
+                                    setIsFormFiled(true);
                                   }}
                                   slotProps={{
                                     textField: {
@@ -3684,6 +3941,7 @@ export default function WorkRequestForm({ currentUser }) {
                               onChange={(newDate) => {
                                 setUDFDate_7(newDate); // Update your state with the new value
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               slotProps={{
                                 textField: {
@@ -3705,6 +3963,7 @@ export default function WorkRequestForm({ currentUser }) {
                               onChange={(newDate) => {
                                 setUDFDate_8(newDate); // Update your state with the new value
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               slotProps={{
                                 textField: {
@@ -3726,6 +3985,7 @@ export default function WorkRequestForm({ currentUser }) {
                               onChange={(newDate) => {
                                 setUDFDate_9(newDate); // Update your state with the new value
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               slotProps={{
                                 textField: {
@@ -3747,6 +4007,7 @@ export default function WorkRequestForm({ currentUser }) {
                               onChange={(newDate) => {
                                 setUDFDate_10(newDate);
                                 setErrorField(null); 
+                                setIsFormFiled(true);
                               }}
                               slotProps={{
                                 textField: {
@@ -4102,7 +4363,7 @@ export default function WorkRequestForm({ currentUser }) {
                                 startIcon={<Iconify icon="jam:close" />}
                                 onClick={onClickCancel}
                               >
-                                Close
+                                Cancel
                               </Button>
                             </div>
                         </div>
@@ -4142,7 +4403,7 @@ export default function WorkRequestForm({ currentUser }) {
                           <TextField
                             label="Approved By :"
                             fullWidth
-                            defaultValue={ApprovedBy}
+                            value={ApprovedBy}
                             disabled
                           />
                         </div>
@@ -4218,7 +4479,7 @@ export default function WorkRequestForm({ currentUser }) {
                           <TextField
                             label="Rejected By :"
                             fullWidth
-                            defaultValue={RejectedBy}
+                            value={RejectedBy}
                             disabled
                           />
                         </div>
@@ -4318,7 +4579,7 @@ export default function WorkRequestForm({ currentUser }) {
                                       fullWidth
                                         id="outlined-required"
                                         label="Approved By"
-                                        defaultValue={label}
+                                        value={label}
                                         style={{ marginBottom: '20px' }}
                                         InputLabelProps={{
                                           style: { color: '#000' }
@@ -4333,7 +4594,7 @@ export default function WorkRequestForm({ currentUser }) {
                                       fullWidth
                                         id="outlined-required"
                                         label="Rejected By"
-                                        defaultValue={label6}
+                                        value={label6}
                                         style={{ marginBottom: '20px' }}
                                         InputLabelProps={{
                                           style: { color: '#000' }
@@ -4351,7 +4612,7 @@ export default function WorkRequestForm({ currentUser }) {
                                       fullWidth
                                         id="outlined-required"
                                         label="Approved Date"
-                                        defaultValue={label4}
+                                        value={label4}
                                         style={{ marginBottom: '20px' }}
                                         InputLabelProps={{
                                           style: { color: '#000' }
@@ -4365,7 +4626,7 @@ export default function WorkRequestForm({ currentUser }) {
                                       fullWidth
                                         id="outlined-required"
                                         label="Rejected Date"
-                                        defaultValue={label4}
+                                        value={label4}
                                         style={{ marginBottom: '20px' }}
                                         InputLabelProps={{
                                           style: { color: '#000' }
@@ -4383,7 +4644,7 @@ export default function WorkRequestForm({ currentUser }) {
                                       fullWidth
                                         id="outlined-required"
                                         label="Work Order No"
-                                        defaultValue={label2}
+                                        value={label2}
                                         style={{ marginBottom: '20px' }}
                                         InputLabelProps={{
                                           style: { color: '#000' }
@@ -4397,7 +4658,7 @@ export default function WorkRequestForm({ currentUser }) {
                                       fullWidth
                                         id="outlined-required"
                                         label="Rejected Description"
-                                        defaultValue={label7}
+                                        value={label7}
                                         style={{ marginBottom: '20px' }}
                                         multiline
                                         rows={4}
@@ -4417,7 +4678,7 @@ export default function WorkRequestForm({ currentUser }) {
                                       fullWidth
                                         id="outlined-required"
                                         label="Work Status"
-                                        defaultValue={label1 && label1=='A' ? "OPE - WO OPEN":""}
+                                        value={label1 && label1=='A' ? "OPE - WO OPEN":""}
                                         style={{ marginBottom: '20px' }}
                                         InputLabelProps={{
                                           style: { color: '#000' }

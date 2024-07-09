@@ -193,7 +193,74 @@ function DefaultTabMaster() {
             return newData;
           });
 
-          
+          // setData((pre) => ({
+          //   ...pre,
+          //   LaborAccount:
+          //     response.data.data.DeafultSettings[0].dft_mst_lab_act +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].lab_act_desc,
+
+          //   MaterialAccount:
+          //     response.data.data.DeafultSettings[0].dft_mst_mat_act +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].mat_act_desc,
+          //   ContractAccount:
+          //     response.data.data.DeafultSettings[0].dft_mst_con_act +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].con_act_desc,
+          //   WRWorkPriority:
+          //     response.data.data.DeafultSettings[0].dft_mst_wkr_pri +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].wkr_pri_desc,
+          //   WOWorkPriority:
+          //     response.data.data.DeafultSettings[0].dft_mst_wko_pri +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].wko_pri_desc,
+          //   PMWorkPriority:
+          //     response.data.data.DeafultSettings[0].dft_mst_prm_pri +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].prm_pri_desc,
+          //   AssetStatus:
+          //     response.data.data.DeafultSettings[0].dft_mst_ast_sts +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].ast_sts_desc,
+          //   WOWorkStatus:
+          //     response.data.data.DeafultSettings[0].dft_mst_wko_sts +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].wrk_sts_desc,
+          //   MRStatus:
+          //     response.data.data.DeafultSettings[0].dft_mst_mtr_sts +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].mtr_sts_description,
+          //   PRStatus:
+          //     response.data.data.DeafultSettings[0].dft_mst_pur_sts +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].pur_sts_description,
+          //   POStatus:
+          //     response.data.data.DeafultSettings[0].dft_mst_puo_sts +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].puo_sts_description,
+          //   WRAssetNo:
+          //     response.data.data.DeafultSettings[0].dft_mst_wkr_asset_no,
+          //   WROriginator:
+          //     response.data.data.DeafultSettings[0].dft_mst_wkr_originator +
+          //     " : " +
+          //     response.data.data.DeafultSettings[0].emp_mst_name,
+          //   WOAssetNo:
+          //     response.data.data.DeafultSettings[0].dft_mst_wko_asset_no,
+          //   POCurrencyCode:
+          //     response.data.data.DeafultSettings[0].dft_mst_po_curr_code,
+          //   DashBoardRefresh:
+          //     response.data.data.DeafultSettings[0].dft_mst_dsh_refresh,
+          //   PMLeadDay: response.data.data.DeafultSettings[0].dft_mst_prm_led,
+          //   WOGracePeriod:
+          //     response.data.data.DeafultSettings[0].dft_mst_grace_period,
+          //   CostRate:
+          //     response.data.data.DeafultSettings[0].dft_mst_eoq_carry_cost_rate,
+          //   ProcessCost:
+          //     response.data.data.DeafultSettings[0].dft_mst_eoq_po_process_cost,
+          //   RowID: response.data.data.DeafultSettings[0].RowID,
+          // }));
         }
       } catch (error) {
         console.log("error", error);

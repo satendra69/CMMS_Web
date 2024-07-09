@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Iconify from "src/components/iconify";
 import Swal from "sweetalert2";
 import MaterialTable from "material-table";
@@ -10,6 +10,7 @@ const AssetParentIdList = ({ onRowClick, onChangePage, onSearchChange,asset  }) 
   const [selectedRowKeys, setSelectedRowKeys] = useState(null);
   const startTime = window.performance.now();
   const [viewedRows, setViewedRows] = useState(0);
+  const tableRef = useRef(null);
 
   useEffect(() => {
     Swal.fire({ title: "Please Wait !", allowOutsideClick: false });
@@ -17,15 +18,15 @@ const AssetParentIdList = ({ onRowClick, onChangePage, onSearchChange,asset  }) 
     httpCommon
       .get("/get_asset_from_parentId_list.php?site_cd=" + site_ID + "&vlu=" + asset)
       .then((response) => {
-       // console.log("response__NET", response);
+       
         const endTime = window.performance.now();
         const loadTime = endTime - startTime;
-       // console.log(`API load time: ${loadTime} milliseconds`);
+      
         Swal.close();
-        //setData(response.data.data.result);
+      
         setData(response.data.data.WorkAssetNo);
         onRowClick(response.data.data.WorkAssetNo.length);
-        // setTotalData(response.data.data.WorkAssetNo.length);
+      
         const endTime2 = window.performance.now();
         const loadTime2 = endTime2 - startTime;
       })
@@ -40,8 +41,10 @@ const AssetParentIdList = ({ onRowClick, onChangePage, onSearchChange,asset  }) 
       title: "Asset No",
       field: "ast_mst_asset_no",
       render: (rowData) => renderIcon(rowData),
+      cellStyle: { textAlign: "center" },
+      headerStyle: { textAlign: "center" },
     },
-    { title: "Long Description", field: "ast_mst_asset_longdesc",width: 450 },
+    { title: "Short Description", field: "ast_mst_asset_shortdesc",width: 450,cellStyle: { textAlign: "center" }, },
     { title: "Level", field: "ast_mst_ast_lvl",width: 40 },
     { title: "Zone", field: "ast_mst_work_area",width: 40 },
     { title: "Asset Location", field: "ast_mst_asset_locn",width: 150 },
@@ -85,26 +88,6 @@ const AssetParentIdList = ({ onRowClick, onChangePage, onSearchChange,asset  }) 
     onChangePage(viewedRowsCount);
   };
 
-  // const handleSearch = (searchText) => {
-  //   // Filter the data based on the search text
-  //   const filteredData = data.filter(
-  //     (item) =>
-  //       item.ast_mst_asset_no
-  //         .toLowerCase()
-  //         .includes(searchText.toLowerCase()) ||
-  //       item.ast_mst_asset_longdesc
-  //         .toLowerCase()
-  //         .includes(searchText.toLowerCase()) ||
-  //       item.ast_mst_work_area
-  //         .toLowerCase()
-  //         .includes(searchText.toLowerCase()) ||
-  //       item.ast_mst_asset_type.toLowerCase().includes(searchText.toLowerCase())
-  //   );
-
-  //   // setData(filteredData);
-  //   //setSearchedDataCount(filteredData.length);
-  //   onSearchChange(filteredData.length);
-  // };
   const handleSearch = (searchText) => {
     // Filter the data based on the search text
     const filteredData = data.filter((item) => {
@@ -125,7 +108,7 @@ const AssetParentIdList = ({ onRowClick, onChangePage, onSearchChange,asset  }) 
     //setSearchedDataCount(filteredData.length);
     onSearchChange(filteredData.length);
   };
-  
+
   return (
     <>
       <div>
@@ -151,6 +134,7 @@ const AssetParentIdList = ({ onRowClick, onChangePage, onSearchChange,asset  }) 
                 fontSize: "12px !important",
               }),
             }}
+         
             onRowClick={handleRowClick}
             onChangePage={handlePageChange}
             onSearchChange={(searchText) => handleSearch(searchText)}

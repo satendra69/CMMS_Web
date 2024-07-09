@@ -9,6 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import Checkbox from "@mui/material/Checkbox";
+import Tooltip from "@mui/material/Tooltip";
 // utils
 
 // hooks
@@ -140,6 +141,17 @@ const getUserPermission = async () => {
 
   }, []);
 
+  const maxCharactersToShow = 35;
+  const truncatedShortDescription =
+  col9 && col9.length > maxCharactersToShow
+      ? `${col9.substring(0, maxCharactersToShow)}...`
+      : col9;
+
+    const truncatedDescription =
+    col10 && col10.length > maxCharactersToShow
+        ? `${col10.substring(0, maxCharactersToShow)}...`
+        : col10;    
+
   return (
     <>
       <TableRow hover selected={selected}>
@@ -240,8 +252,16 @@ const getUserPermission = async () => {
         <TableCell>{col6}</TableCell>
         <TableCell>{col7}</TableCell>
         <TableCell>{col8}</TableCell>
-        <TableCell>{col9}</TableCell>
-        <TableCell>{col10}</TableCell>
+        <TableCell>
+        <Tooltip title={col9} placement="top" arrow >
+              <span>{truncatedShortDescription}</span>
+            </Tooltip>
+        </TableCell>
+        <TableCell>
+        <Tooltip title={col10} placement="top" arrow >
+              <span>{truncatedDescription}</span>
+        </Tooltip>
+        </TableCell>
         <TableCell>{col11}</TableCell>
         <TableCell>{col12}</TableCell>
         <TableCell>{col13}</TableCell>

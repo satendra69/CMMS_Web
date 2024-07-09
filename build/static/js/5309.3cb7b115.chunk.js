@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[5309],{55309:(e,s,n)=>{n.r(s),n.d(s,{default:()=>t});var r=n(6907),c=n(9827),a=n(80184);function t(){return(0,a.jsxs)(a.Fragment,{children:[(0,a.jsx)(r.ql,{children:(0,a.jsx)("title",{children:" Dashboard: Create a new invoice"})}),(0,a.jsx)(c.nC,{})]})}}}]);
-//# sourceMappingURL=5309.3cb7b115.chunk.js.map

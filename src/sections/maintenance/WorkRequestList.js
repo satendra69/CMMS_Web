@@ -34,7 +34,6 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 // components
 import { useSettingsContext } from 'src/components/settings';
-import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import {
   useTable,
@@ -63,18 +62,11 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 
 import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import FormLabel from '@mui/material/FormLabel';
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 
 import { styled } from "@mui/material/styles";
-//import loderImg from "../../../src/assets/img/Work_order.gif";
-import loderImg from "../../../src/assets/img/Work_order.gif";
-//
-
-import ExportAssetlistToExcel from "./../Asset/ExportFIle/ExportAssetlistToExcel";
 
 import WorkReqTableRow from './workrequest-table-row';
 import WorkReqTableFiltersResult from './WorkReqTableFiltersResult';
@@ -90,38 +82,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 // ----------------------------------------------------------------------
 
-const TABLE_HEAD = [
-  { id: '', label: 'Action', width: 60 },
-  { id: 'wkr_mst_wr_no', label: 'Work Request No', width: 165 },
-  { id: 'wkr_mst_wr_descs', label: 'Description', width: 220, padding: 10 },
-  { id: 'wkr_mst_wr_status', label: 'Approval Status', width: 160 },
-  { id: 'wkr_mst_assetno', label: 'Asset No', width: 120 },
-  { id: 'wkr_mst_chg_costcenter', label: 'Charge Cost Center', width: 180 },
-  { id: 'wkr_mst_work_area', label: 'Work Area', width: 120 },
-  { id: 'wkr_mst_assetlocn', label: 'Asset Location', width: 145 },
-  { id: 'wkr_mst_location', label: 'Level', width: 100 },
-  { id: 'wkr_mst_temp_asset', label: 'Temporary Asset', width: 160 },
-  { id: 'wkr_mst_email_notification', label: 'Email Notification', width: 170 },
-  { id: 'wkr_mst_work_type', label: 'Work Type', width: 120 },
-  { id: 'wkr_mst_work_class', label: 'Work Class', width: 125 },
-  { id: 'wkr_mst_work_group', label: 'Work Group', width: 125 },
-  { id: 'wkr_mst_wo_status', label: 'Wr Status', width: 125 },
-  { id: 'wkr_mst_projectid', label: 'Project Id', width: 125 },
-  { id: 'wkr_mst_originator', label: 'Requestor', width: 100 },
-  { id: 'wkr_mst_phone', label: 'Phone', width: 180 },
-  { id: 'wkr_det_wo', label: 'Work Order No', width: 155 },
-  { id: 'wkr_det_approver', label: 'Approved By', width: 135 },
-  { id: 'wkr_det_appr_date', label: 'Approved Date', width: 145 },
-  { id: 'wkr_det_reject_date', label: 'Rejected Description', width: 190 },
-  { id: 'wkr_det_reject_by', label: 'Rejected By', width: 145 },
-  { id: 'wkr_reject_date', label: 'Rejected Date', width: 150 },
-  { id: 'wkr_mst_orig_priority', label: 'Original Priority', width: 160 },
-  { id: 'wkr_mst_org_date', label: 'Origination Date', width: 160 },
-  { id: 'wkr_mst_due_date', label: 'Due Date', width: 140 },
-  { id: 'wkr_mst_fault_code', label: 'Fault Code', width: 140 },
-  { id: 'wkr_mst_create_by', label: 'Created By', width: 140 },
-  { id: 'wkr_mst_create_date', label: 'Created Date', width: 140 },
-];
+
 
 const defaultFilters = {
   col1: '',
@@ -152,9 +113,13 @@ export default function WorkRequestList() {
   const [maxHeight, setMaxHeight] = useState("400px");
   const [tableData, setTableData] = useState([]);
   const [totalRow, setTotalRow] = useState();
+  const [Headerdata, setheaderData] = useState([]);
 
   const [filters, setFilters] = useState(defaultFilters);
-  const [selectedOption, setSelectedOption] = useState('');
+
+  const { selectedOption: returnedSelectedOption, comeBack } = location.state || {};
+  const [selectedOption, setSelectedOption] = useState(returnedSelectedOption || '');
+  const [selectedComeBack, setSelectedComeBack] = useState(comeBack || '');
 
   const confirm = useBoolean();
  
@@ -185,7 +150,7 @@ export default function WorkRequestList() {
   const [showWordOrderQryList, setShowWordOrderQryList] = useState(false);
   const handleShowWorkOrderQryList = () => setShowWordOrderQryList(true);
   const [showSaveAs, setShowSaveAs] = useState(false);
-  const [isChecked, setIsChecked] = useState(true);
+  const [isChecked, setIsChecked] = useState(false);
   const [selectedOptionEmptyErrorQtr, setSelectedOptionEmptyErrorQtr] =
   useState(false);
   const [valueptEmptyErrorQtr, setValueptEmptyErrorQtr] = useState(false);
@@ -214,6 +179,10 @@ export default function WorkRequestList() {
   const handleCloseDisapprove = () => setShowDisapprove(false);
   const [RejectDate, setRejectDate] = useState(new Date());
   const [RejectedDescription, setRejectedDescription] = useState("");
+
+  const [QueryTitleRowId, setQueryTitleRowID] = useState("");
+  const [defaultTitle, setDefaultTitle] = useState('');
+  const [tempRowID, setTempRowID] = useState(null);
   
   const [showPromt, setShowPromt] = useState(false);
   const [rowsDropdownPrompt, setRowsDropdownPrompt] = useState([
@@ -229,35 +198,15 @@ export default function WorkRequestList() {
     },
   ]);
   
-  // Get Api data useEffect
-  const fetchData = useCallback(async () => {
-    //Swal.fire({ title: 'Please Wait!', allowOutsideClick: false });
-    //Swal.showLoading();
-    setIsLoading(true);
-    
-    try {
-      const response = await httpCommon.get(
-        `/get_work_request_master_table_data.php?site_cd=${site_ID}&page=${currentPage}`
-      );
-     // console.log("response_____fetcha___",response);
-      setTableData(response.data.data.result);
-      setTotalRow(response.data.total_count);
-     // Swal.close();
-      setIsLoading(false);
-    
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  }, [site_ID, currentPage]);
+ 
 
   const fetchFilterSubPopupSavedropdon = async () => {
     // Get dropdown value using api
-    
     try {
       const response = await httpCommon.get(
         `/get_workReq_filter_dropdown.php?site_cd=${site_ID}&auditUser=${AuditUser}`
       );
-      //  console.log("check__-asset__",response);
+       // console.log("check__-asset__",response);
       setWorkReqFilterDpd(response.data);
   // Swal.close();
       if (DropListIdGet !== "" && DropListIdGet !== null) {
@@ -275,37 +224,177 @@ export default function WorkRequestList() {
     }
   };
       //  fetch the data Gauge dashbord
-      const fetchDataGaugeDSB = useCallback(async () => {
-        setIsLoading(true);
+  const fetchDataGaugeDSB = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await httpCommon.post(
+        "/get_gauge_dashbord_work_request_data.php?page=" + currentPage,
+        {
+          rows: DashbordDataGauge,
+          rowsort: DashbordDataSrt,
+          // rowsPrm: DashbordDataPrmMst,
+          site_cd: site_ID,
+          emp_ID:emp_owner,
+        }
+      );
+     // console.log("response____dashobord",response);
+      if (response.data.status === "SUCCESS") {
+        if (response.data.data.result.length > 0) {
+          setTableData(response.data.data.result);
+          setheaderData(response.data.data.header);
+          setTotalRow(response.data.total_count);
+          setselectDropRowID(DropListIdGet);
+          // setResponceStats(response.data.StatusPRM);
+          // setTotalCount(response.data.TotalCountPRM);
+        }
+        
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }, [site_ID, currentPage]);
+
+  console.log("selectDropRowID____",selectDropRowID);
+   // Get Api data useEffect
+  const fetchData = useCallback(async () => {
+  
+    setIsLoading(true);
+    
+    try {
+      const response = await httpCommon.get(
+        `/get_work_request_master_table_data.php?site_cd=${site_ID}&page=${currentPage}`
+      );
+    //  console.log("response_____fetcha___",response);
+       // console.log("selectedOption____",selectedOption);
+      if(selectedOption === ""){
+        setheaderData(response.data.data.header);
+        setTableData(response.data.data.result);
+        setTotalRow(response.data.total_count);
+       }else{
+        setheaderData(response.data.data.header);
+       }
+
+      // get Dropdown Title
+      const response2 = await httpCommon.get(
+        `/get_workReq_filter_dropdown.php?site_cd=${site_ID}&auditUser=${AuditUser}`
+      );
+    
+      if(selectedOption === ""){
+        const defaultItem = response2.data.find(item => item.cf_query_default_flag === "1");
+         if (defaultItem) {
+           setDefaultTitle(defaultItem.cf_query_title);
+           setselectDropRowID(defaultItem.RowID);
+         }
+       }else{
+         setDefaultTitle(selectedOption);
+      }
+
+      setIsLoading(false);
+    
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }, [site_ID, currentPage]);
+
+//console.log("defaultTitle____",defaultTitle);
+
+  useEffect(() => {
+    if (defaultTitle) {
+
+      handleOptionTableList({ target: { value: defaultTitle }});
+
+    }
+  }, [defaultTitle,site_ID, currentPage]);
+
+  const handleOptionTableList = async (event,responseData) => {
+   
+    const selectedValue = event?.target?.value || selectedOption;
+    setCurrentPage(1);
+  
+    const selectedOptionObjectFilter = workReqFilterDpd.find(
+      (item) => item.cf_query_title === selectedValue
+    );
+
+    let selectedOptionObject;
+
+    if (Array.isArray(responseData) && responseData.length > 0) {
+      selectedOptionObject = responseData.find(
+        (item) => item.cf_query_title === selectedValue
+      );
+    }
+
+    if (selectedOptionObjectFilter) {
+      const GetRowID = selectedOptionObjectFilter.RowID;
+      const GetPrompt = selectedOptionObjectFilter.cf_query_list_prompt;
+      if (selectedComeBack === "" || selectedComeBack === undefined){
+      if(GetPrompt == '1'){
+        setShowPromt(true);
+        Swal.fire({
+          title: "Please Wait !",
+          allowOutsideClick: false,
+          customClass: {
+            container: "swalcontainercustom",
+          },
+        });
+        Swal.showLoading();
         try {
-          const response = await httpCommon.post(
-            "/get_gauge_dashbord_work_request_data.php?page=" + currentPage,
-            {
-              rows: DashbordDataGauge,
-              rowsort: DashbordDataSrt,
-             // rowsPrm: DashbordDataPrmMst,
-              site_cd: site_ID,
-              emp_ID:emp_owner,
-            }
+          const response = await httpCommon.get(
+            "/get_work_order_filter_query_data.php?site_cd=" +
+              site_ID +
+              "&RowID=" +
+              GetRowID
           );
-       //   console.log("response____dashobord",response);
-          if (response.data.status === "SUCCESS") {
-            if (response.data.data.result.length > 0) {
-              setTableData(response.data.data.result);
-              setTotalRow(response.data.total_count);
-             // setResponceStats(response.data.StatusPRM);
-             // setTotalCount(response.data.TotalCountPRM);
-            }
-           
-            setIsLoading(false);
+       // console.log("firsttime load___",response);
+          if (response.data.data && response.data.data.list_typeF && response.data.data.list_typeF.length > 0) {
+            const newRows = response.data.data.list_typeF.map((item) => ({
+              selectedOption: item.cf_query_list_column,
+              operator: item.cf_query_list_operator,
+              valuept: item.cf_query_list_value,
+              logical: item.cf_query_list_logical,
+              siteCd: site_ID,
+              RowId: GetRowID,
+              prompt:GetPrompt,
+              Column:item.customize_header,
+              queryTypedd: "F",
+            }));
+            const timeoutId = setTimeout(() => {
+              Swal.close();
+              setRowsDropdownPrompt(newRows);
+            }, 3000);
+            //setShowAssetByDescp(false);
+          } else {
+            Swal.fire({
+              icon: "error",
+              customClass: {
+                container: "swalcontainercustom",
+              },
+              title: "Oops...",
+              text: "No record found Please try again !",
+            });
           }
         } catch (error) {
           console.error("Error fetching data:", error);
         }
-      }, [site_ID, currentPage]);
+        return;
+      }
+    }
 
+      setExportExcelId(GetRowID);
+      setselectDropRowID(GetRowID);
+      setCurrentPage(1);
+      setDropListIdGet([]);
+      setTitleAstReg("");
+    }
+
+    setSelectedOption(selectedValue);
+  };
+//console.log("tableData_____",tableData);
   const handleOptionChange = async (event,responseData) => {
     const selectedValue = event?.target?.value || selectedOption;
+
+    setDefaultTitle("");
+    setSelectedComeBack("");
     setCurrentPage(1);
   
     const selectedOptionObjectFilter = workReqFilterDpd.find(
@@ -326,6 +415,7 @@ export default function WorkRequestList() {
 
       if(GetPrompt == '1'){
         setShowPromt(true);
+        setTempRowID(GetRowID);
         Swal.fire({
           title: "Please Wait !",
           allowOutsideClick: false,
@@ -334,6 +424,7 @@ export default function WorkRequestList() {
           },
         });
         Swal.showLoading();
+      //  console.log("GetRowID____",GetRowID)
         try {
           const response = await httpCommon.get(
             "/get_work_order_filter_query_data.php?site_cd=" +
@@ -341,7 +432,7 @@ export default function WorkRequestList() {
               "&RowID=" +
               GetRowID
           );
-          
+         // console.log("response_______selectOption___",response);
           if (response.data.data && response.data.data.list_typeF && response.data.data.list_typeF.length > 0) {
             const newRows = response.data.data.list_typeF.map((item) => ({
               selectedOption: item.cf_query_list_column,
@@ -351,14 +442,17 @@ export default function WorkRequestList() {
               siteCd: site_ID,
               RowId: GetRowID,
               prompt:GetPrompt,
+              Column:item.customize_header,
               queryTypedd: "F",
             }));
             const timeoutId = setTimeout(() => {
               Swal.close();
               setRowsDropdownPrompt(newRows);
+              setSelectedOption(selectedValue);
             }, 3000);
             //setShowAssetByDescp(false);
           } else {
+            setSelectedOption(selectedValue);
             Swal.fire({
               icon: "error",
               customClass: {
@@ -388,7 +482,13 @@ export default function WorkRequestList() {
       setTitleAstReg("");
     }
     setSelectedOption(selectedValue);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  
   };
+
+  const fetchDataUsingRefreshBtn = useCallback(async () =>{
+    getb();
+}, [site_ID, currentPage, selectDropRowID]);
 
   const getb = useCallback(async () => {
   
@@ -396,9 +496,9 @@ export default function WorkRequestList() {
     try {
      
       const response = await httpCommon.post(
-        `/getWorkReqOptionListData.php?site_cd=${site_ID}&ItemID=${selectDropRowID}&page=${currentPage}&EmpId=${emp_owner}`
+        `/get_workreq_option_list_data.php?site_cd=${site_ID}&ItemID=${selectDropRowID}&page=${currentPage}&EmpId=${emp_owner}`
       );
-     //  console.log("check___api__data__",response);
+      //  console.log("check___api__data__",response);
       if (
         response.data.data &&
         response.data.data.result &&
@@ -470,22 +570,6 @@ export default function WorkRequestList() {
     }
   }
 
-  useEffect(() => {
-    
-    if (selectDropRowID != "" && selectDropRowID != null) {
-      getb();
-    }else if(TableSearchData !="" && TableSearchData != null){
-      handelSearchButton();
-    }else if(Array.isArray(DashbordDataGauge) && DashbordDataGauge.length > 0){
-      fetchDataGaugeDSB();
-
-    }else {
-      fetchData();
-    }
-    fetchFilterSubPopupSavedropdon();
-    get_dropdown();
-  }, [site_ID, currentPage, selectDropRowID,fetchData,getb]);
-
   const dataFiltered = applyFilter({
     inputData: Array.isArray(tableData) ? tableData : [],
     comparator: getComparator(table.order, table.orderBy),
@@ -511,16 +595,6 @@ export default function WorkRequestList() {
     },
     [table]
   );
-
-  // const handleDeleteRow = useCallback((id) => {
-  //   console.log("crow_______",id);
-  //   //   const deleteRow = tableData.filter((row) => row.id !== id);
-  //   //   setTableData(deleteRow);
-
-  //   //   table.onUpdatePageDeleteRow(dataInPage.length);
-  //    },
-  //   [dataInPage.length, table, tableData]
-  // );
 
   const handleDeleteRow = useCallback(async (id, row) => {
   //  console.log("row++++++____", row);
@@ -598,24 +672,15 @@ export default function WorkRequestList() {
 
   const handleEditRow = useCallback(
     (id,row) => {
-    // console.log("row____",row);
-  //  console.log("id_____",id);
-      const Rowid = id;
-      const AstNo = row.wkr_mst_assetno;
-      // if (Rowid !== '' && AstNo !== '') {
-      //   navigate(`/dashboard/work/newRequest?rowID=${Rowid}&ast_no=${AstNo}`, {
-      //     state: {
-      //       currentPage,
-      //       selectedOption,
-      //     },
-      //   });
-      // }
-     
-      if (Rowid !== '' && AstNo !== '') {
+  
+      const Rowid = row.col31;
+      const WorkReqNo = row.col2;
+        console.log("click_row_id__",row)
+      if (Rowid !== '' && WorkReqNo !== '') {
         navigate(`/dashboard/work/newRequest`, {
           state: {
             RowID:Rowid,
-            Ast_no:AstNo,
+            WorkReqNo:WorkReqNo,
             currentPage,
             selectedOption,
           },
@@ -868,7 +933,7 @@ export default function WorkRequestList() {
           admin: emp_owner,
         }
       );
-       //console.log("response____asset__",response);
+       console.log("response____asset__",response);
       if (
         response.data.data &&
         response.data.data.result &&
@@ -1257,6 +1322,7 @@ export default function WorkRequestList() {
           siteCd: site_ID,
           owner: emp_owner,
           mst_RowID: RowID,
+          defaultFlag:isChecked,
           rowsortQrtData: rowsortQrt,
         };
         try {
@@ -1264,12 +1330,12 @@ export default function WorkRequestList() {
             "/insert_work_req_query_listsave_data.php",
             combinedData
           );
-            console.log("response__SaveBytncf__",response);
           if (response.data.status == "SUCCESS") {
+            setselectDropRowID(response.data.ROW_ID);
             Swal.close();
             Swal.fire({
               title: "Success!",
-              text: "Your query update successfully.",
+              text: "Your Query Update Successfully.",
               icon: "success",
               confirmButtonText: "OK",
               customClass: {
@@ -1277,6 +1343,7 @@ export default function WorkRequestList() {
               },
             }).then((result) => {
               if (result.isConfirmed) {
+                setIsChecked(false);
                 RetriveDataQueryList();
                 setRowsQrt([]);
                 setselectedOptionValue("");
@@ -1358,8 +1425,20 @@ export default function WorkRequestList() {
       cf_query_title = parts[0].trim();
       RowID = parts[parts.length - 1].trim();
     }
- 
+
     setTitleAstReg(cf_query_title);
+    if(RowID !== "" && cf_query_title !==""){
+      setQueryTitleRowID(RowID);
+   // setIsChecked(true);
+    const initialCheckedState = workReqFilterDpd.some(
+      item => item.RowID === RowID && item.cf_query_title === cf_query_title && item.cf_query_default_flag === "1"
+    );
+  
+    setIsChecked(initialCheckedState);
+
+  }else{
+    setIsChecked(false);
+  }
 
     setRowsQrt([]);
     setRowsortQrt([]);
@@ -1560,10 +1639,10 @@ const handleInputValueChangeQtr2 = (index, newValue) => {
 
     try {
       const response = await httpCommon.post(
-        "/InsertWorkReqQueryListSaveAsData.php",
+        "/insert_work_req_query_list_save_as_data.php",
         combinedData
       );
-
+//console.log("response___id___",response);
       if (response.data.status == "SUCCESS") {
         setTitleAstReg(response.data.Title);
         fetchFilterSubPopupSavedropdon();
@@ -2052,7 +2131,7 @@ const fetchDataResponse = async (hasRowIdValuept) => {
         RowId:hasRowIdValuept
       }
     );
-    //console.log("response____output",response);
+    console.log("response____output22",response);
     setTableData(response.data.data.result);
     setTotalRow(response.data.total_count);
     setTitleAstReg(response.data.titleName);
@@ -2100,26 +2179,16 @@ const handleDropDownPromptSaveAsBtn = async () => {
     };
     try {
       const response = await httpCommon.post(
-        "/insert_work_req_query_listsave_data.php",
+        "/insert_work_req_query_list_prompt_save_data.php",
         combinedData
+
       );
         
       if (response.data.status == "SUCCESS") {
+
         Swal.close();
-        Swal.fire({
-          title: "Success!",
-          text: "Your query update successfully.",
-          icon: "success",
-          confirmButtonText: "OK",
-          customClass: {
-            container: "swalcontainercustom",
-          },
-        }).then((result) => {
-          if (result.isConfirmed) {
-           
-            fetchDataResponse(hasRowIdValuept);
-          }
-        });
+        setselectDropRowID(tempRowID);
+        fetchDataResponse(hasRowIdValuept);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -2127,6 +2196,37 @@ const handleDropDownPromptSaveAsBtn = async () => {
   }
 
 };
+
+const TABLE_HEAD = Headerdata && Headerdata.map((item, index) => {
+  const width = [165, 220, 160, 120, 180, 120,145,100,160,170,120,125,125,125,125,100,180,155,135,145,190,145,150,160,160,140,140,140,140][index]; 
+  return {
+    id: item.accessor,
+    label: item.Header,
+    width
+  };
+});
+
+if (TABLE_HEAD) {
+  TABLE_HEAD.unshift({ id: '', label: 'Action', width: 60 });
+  TABLE_HEAD.push({ id: 'create_date', label: 'Create Date', width: 140 });
+}
+
+useEffect(() => {
+    
+  if (selectDropRowID != "" && selectDropRowID != null) {
+    getb();
+  }else if(TableSearchData !="" && TableSearchData != null){
+    handelSearchButton();
+  }else if(Array.isArray(DashbordDataGauge) && DashbordDataGauge.length > 0){
+    fetchDataGaugeDSB();
+
+  }else {
+    fetchData();
+  }
+  fetchFilterSubPopupSavedropdon();
+  get_dropdown();
+}, [site_ID, currentPage, selectDropRowID,fetchData,getb,fetchDataGaugeDSB]);
+
   return (
     <>
        <Helmet>
@@ -2154,8 +2254,6 @@ const handleDropDownPromptSaveAsBtn = async () => {
                New
               </Button>
 
-            
-              
             }
             sx={{ mb: { xs: 3, md: 5 } }}
           />
@@ -2193,7 +2291,7 @@ const handleDropDownPromptSaveAsBtn = async () => {
                 }}
                 className="selectOptioncls"
               >
-                <InputLabel id="select-label" className={(TitleAstReg!== "" || selectedOption)? "selectedcss" : ""}>Select an Option</InputLabel>
+                <InputLabel id="select-label" className={(TitleAstReg!== "" || selectedOption)? "selectedcss" : ""}>Select an Query</InputLabel>
                 <Select
                   labelId="select-label"
                   id="select"
@@ -2223,6 +2321,15 @@ const handleDropDownPromptSaveAsBtn = async () => {
                     ))}
                 </Select>
               </FormControl>
+              <Tooltip title="Refresh" placement="top" arrow >
+                  <span
+                    className="ListDataRefBtn"
+                    onClick={fetchDataUsingRefreshBtn}
+                    style={{ border: '0px' }}
+                  >
+                    <Icon icon="icon-park:refresh-one" style={{ width:'23px', height:'23px' }} /> 
+                  </span>
+                </Tooltip>
               <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
                   <div
                     className="wordkOrdersearchInput"
@@ -2308,8 +2415,8 @@ const handleDropDownPromptSaveAsBtn = async () => {
                     order={table.order}
                     orderBy={table.orderBy}
                     headLabel={TABLE_HEAD}
-                    rowCount={tableData.length}
-                    numSelected={table.selected.length}
+                    rowCount={tableData?.length || 0}
+                    numSelected={table.selected?.length || 0}
                     onSort={table.onSort}
                     className="stickyheader"
                   />
@@ -2347,7 +2454,8 @@ const handleDropDownPromptSaveAsBtn = async () => {
                         </TableRow>
                         ) : (
                           <>
-                            {tableData.length === 0 ? (
+                        
+                            {tableData?.length === 0 ? (
                               <TableRow>
                                 <TableCell colSpan={numberOfColumns} className="NoRecodcls" >
                                   No Record Found
@@ -2355,19 +2463,20 @@ const handleDropDownPromptSaveAsBtn = async () => {
                               </TableRow>
                             ) : (
                               <>
-                            
+                        
                                 {dataFiltered.map((row) => (
 
                                   <WorkReqTableRow
+                                  
                                     key={row.id}
                                     row={row}
                                     rowStats={ResponceStats}
-                                    selected={table.selected.includes(row.mst_RowID)}
-                                    onSelectRow={() => table.onSelectRow(row.mst_RowID)}
-                                    onDeleteRow={() => handleDeleteRow(row.mst_RowID,row)}
-                                    onEditRow={() => handleEditRow(row.RowID,row)}
+                                    selected={table.selected.includes(row.col1)}
+                                    onSelectRow={() => table.onSelectRow(row.col1)}
+                                    onDeleteRow={() => handleDeleteRow(row.col1,row)}
+                                    onEditRow={() => handleEditRow(row.col1,row)}
                                     onDisApprove={() => handleShowDisapprove(row)}
-                                    onApprove={() => handleShowApprove(row.mst_RowID,row)}
+                                    onApprove={() => handleShowApprove(row.col1,row)}
                                   //  onViewRow={() => handleViewRow(row.id)}
                                  //   onCompleteRow={() => handleCompleteRow(row.col71)}
                                   //  onCloseRow={() => handleCloseRow(row.col71)}
@@ -2382,7 +2491,7 @@ const handleDropDownPromptSaveAsBtn = async () => {
                           emptyRows={emptyRows(
                             table.page,
                             table.rowsPerPage,
-                            tableData.length
+                            tableData?.length
                           )}
                         />
                       </TableBody>
@@ -2907,7 +3016,6 @@ const handleDropDownPromptSaveAsBtn = async () => {
                         id="select"
                         style={{ width: "60%" }}
                         value={selectedOptionValue}
-                        // onChange={handleClickOption}
                         onChange={(event) =>
                           handleClickOption(event.target.value)
                         }
@@ -3651,9 +3759,9 @@ const handleDropDownPromptSaveAsBtn = async () => {
                       <td style={{ width: "25%" }}>
                       <input
                           type="text"
-                          style={{ width: "100%" }}
+                          style={{ width: "100%", textAlign: 'center' }}
                           disabled
-                          value={row.selectedOption || ""}
+                          value={row.Column || ""}
                           className={`custom-Astselect ${
                             index === rows.length - 1 && valueptEmptyError
                               ? "error-border"
@@ -3667,7 +3775,7 @@ const handleDropDownPromptSaveAsBtn = async () => {
                       <td style={{ width: "25%" }}>
                       <input
                           type="text"
-                          style={{ width: "100%" }}
+                          style={{ width: "100%", textAlign: 'center' }}
                           value={row.operator || ""}
                           disabled
                           className={`custom-Astselect ${
@@ -3682,7 +3790,7 @@ const handleDropDownPromptSaveAsBtn = async () => {
                       <td style={{ width: "25%" }}>
                       <input
                           type="text"
-                          style={{ width: "100%" }}
+                          style={{ width: "100%", textAlign: 'center' }}
                           value={row.valuept || ""}
                           className={`custom-Astselect ${
                             index === rows.length - 1 && valueptEmptyError
@@ -3697,7 +3805,7 @@ const handleDropDownPromptSaveAsBtn = async () => {
                       <td style={{ width: "25%" }}>
                         <input
                           type="text"
-                          style={{ width: "100%" }}
+                          style={{ width: "100%", textAlign: 'center' }}
                           disabled
                           value={row.logical || ""}
                           className={`custom-Astselect ${

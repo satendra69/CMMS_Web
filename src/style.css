@@ -12,11 +12,11 @@ img.SubmenuIMGName {
 
 .AssetFilterBtn {
   padding: 5px 5px !important;
-    width: 100px;
-    color: #000 !important;
-    font-weight: 500 !important;
-    border: 1px solid #00000026 !important;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2) !important;
+  width: 100px;
+  color: #000 !important;
+  font-weight: 500 !important;
+  border: 1px solid #00000026 !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2) !important;
 }
 
 .AssetFilterBtn:hover {
@@ -42,10 +42,10 @@ thead.MuiTableHead-root {
 }
 .wordkOrdersearchInput {
   width: 100%;
-    border: 1px solid #00000030;
-    border-radius: 8px;
-    padding: 0px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid #00000030;
+  border-radius: 8px;
+  padding: 0px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2) !important;
 }
 .selectOptioncls label#select-label {
   top: -8px;
@@ -54,7 +54,7 @@ thead.MuiTableHead-root {
 .selectedcss {
   top: 0px !important;
 }
-.customInputStatusW{
+.customInputStatusW {
   width: 85px !important;
   text-align: center !important;
   font-size: 12px !important;
@@ -66,18 +66,18 @@ thead.MuiTableHead-root {
   cursor: pointer;
   background-color: rgb(33, 150, 243) !important;
 }
-.spanworkReqStstus{
+.spanworkReqStstus {
   background-color: yellow;
-    color: red;
-    font-size: 12px;
-    padding: 3px;
-    border-radius: 5px;
-    margin-left: 5px;
+  color: red;
+  font-size: 12px;
+  padding: 3px;
+  border-radius: 5px;
+  margin-left: 5px;
 }
 .customInputStatusW:hover {
   background-color: rgb(44, 128, 197) !important;
 }
-.customInputStatusA{
+.customInputStatusA {
   width: 80px !important;
   text-align: center !important;
   font-size: 12px !important;
@@ -95,7 +95,7 @@ thead.MuiTableHead-root {
 .wkr_req_approvests_Popup {
   margin-top: 8%;
 }
-.customInputStatusD{
+.customInputStatusD {
   width: 95px !important;
   text-align: center !important;
   font-size: 12px !important;
@@ -167,9 +167,9 @@ a.calendarView {
 }
 a.active.calendarView {
   color: #fff;
-    border: 1px solid #3949ab;
-    box-shadow: rgba(0, 0, 0, 0.15) 0 8px 15px;
-    background-color: #3949ab !important;
+  border: 1px solid #3949ab;
+  box-shadow: rgba(0, 0, 0, 0.15) 0 8px 15px;
+  background-color: #3949ab !important;
 }
 .swal2-popup {
   padding: 0 0 0.8em !important;
@@ -273,19 +273,19 @@ button.btn.Refbtl {
 }
 .table.table-hover.astFimg tr th {
   width: 20%;
-    border-bottom: 0px solid #b5b5b5;
-    border-radius: 0px;
-    font-size: 14px;
-    color: #637381;
-    font-weight: 600;
-    background-color: #F4F6F8;
+  border-bottom: 0px solid #b5b5b5;
+  border-radius: 0px;
+  font-size: 14px;
+  color: #637381;
+  font-weight: 600;
+  background-color: #f4f6f8;
 }
 .astFimg tbody tr td {
   width: 20%;
   text-align: center;
   font-size: 12px;
   color: #637381;
-    font-weight: 600;
+  font-weight: 600;
 }
 .astFimg tbody tr td img {
   width: 60px;
@@ -1373,7 +1373,7 @@ span.highlight {
   width: 40px;
   height: 35px;
 }
-.avatar2.top-left{
+.avatar2.top-left {
   margin-right: -30px;
 }
 span.ListDataRefBtn {
@@ -1382,9 +1382,8 @@ span.ListDataRefBtn {
   border-radius: 10px;
   background: rgb(255, 255, 255);
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2) !important;
+ /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.2) !important;  */
   padding: 4px 5px 4px 5px;
-
 }
 /* End Button css */
 
@@ -1452,6 +1451,30 @@ span.ListDataRefBtn {
   z-index: 1000 !important;
   background-color: #000;
 }
+.flex2 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20;
+}
+.w50 {
+  width: 50% !important;
+}
+.flexcheckbox {
+  display: "flex";
+  align-items: center;
+  justify-content: space-between;
+}
+.mr50 {
+  margin-right: 49.5%;
+}
+.mr40 {
+  margin-right: 38%;
+}
+.mr52 {
+  margin-right: 52%;
+}
 @media (max-width: 600px) {
   .buttonsTop {
     margin-right: auto;
@@ -1462,5 +1485,23 @@ span.ListDataRefBtn {
   .serchInputW {
     width: 60vw;
     margin-right: auto;
+  }
+  .flex2 {
+    display: block;
+  }
+  .mt_5 {
+    margin-top: 20px;
+  }
+  .w50 {
+    width: 100% !important;
+  }
+  .mr50 {
+    margin-right: 0px;
+  }
+  .mr52 {
+    margin-right: 10px;
+  }
+  .mr40 {
+    margin-right: 10px;
   }
 }

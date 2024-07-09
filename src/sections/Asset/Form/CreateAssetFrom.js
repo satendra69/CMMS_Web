@@ -855,7 +855,7 @@ export default function CreateAssetFrom({ currentUser, onPageChange }) {
       const response = await httpCommon.get(
         "/get_asset_edit_img.php?RowID=" + RowID
       );
-   // console.log("response____",response);
+    
         if (response.data.data) {
           // Check if AllImgGet exists and has items
           
@@ -1234,7 +1234,7 @@ const findCustomizerequiredLabel = (columnName) => {
       },
     });
 
-    //Swal.showLoading();
+    Swal.showLoading();
     let get_date = Moment().utcOffset("+08:00").format("yyyy-MM-DD HH:mm:ss");
 
     let site_ID = localStorage.getItem("site_ID");
@@ -2252,7 +2252,6 @@ if (
       RowID: RowID,
     };
     
- // console.log("json_AssetUpdate____",json_AssetUpdate);
     for (let i = 0; i < AssetMandatoryFiled.length; i++) {
       const item = AssetMandatoryFiled[i];
       const fieldValue = json_AssetUpdate[item.column_name];
@@ -2262,8 +2261,7 @@ if (
         break; // Stop loop as soon as a missing field is found
       }
     }
-  //  console.log("Code block executed");
-    // If any fields are missing, display an error message
+
     if (missingFields.length > 0) {
       Swal.close();
   
@@ -2319,6 +2317,7 @@ if (
                 state: {
                   currentPage,
                   selectedOption,
+                  comeBack:"Come_Back_cancel",
                 },
               });
               });
@@ -2343,6 +2342,7 @@ if (
               state: {
                 currentPage,
                 selectedOption,
+                comeBack:"Come_Back_cancel",
               },
             });
             }
@@ -2532,17 +2532,18 @@ if (
       },
       confirmButtonText: "Yes",
       denyButtonText: `No`,
-      focusCancel: true // Add this option
+      focusCancel: true 
     }).then((result) => {
-      /* Read more about isConfirmed, isDenied below */
+      
       if (result.isConfirmed) {
-       // Swal.fire("Saved!", "", "success");
+      
        onClickChange(event);
       } else if (result.isDenied) {
           navigate(`/dashboard/asset/list`, {
             state: {
               currentPage,
               selectedOption,
+              comeBack:"Come_Back_cancel",
             },
           });
         setIsFormFiled(false);
@@ -2553,6 +2554,7 @@ if (
       state: {
         currentPage,
         selectedOption,
+        comeBack:"Come_Back_cancel",
       },
     });
   }
@@ -2578,7 +2580,7 @@ if (
     // return `${days}d: ${hours}h: ${minutes}m`;
   };
   const getsteps = async () => {
-     console.log("enter_getSteps___");
+  
     Swal.fire({ title: "Please Wait !", allowOutsideClick: false , customClass: {
       container: "swalcontainercustom",
     }, });
@@ -2638,8 +2640,6 @@ if (
     setStatusShow(true);
     getsteps();
   };
-
-
 
   const toggleDiv = () => {
     setIsOpenWork(!isOpenWork);
@@ -2710,6 +2710,7 @@ if (
     setErrorField(null);
   }
 
+  // Asset NO render base oncondition 
   useEffect(() => {
    
     const selectedKey = Asset_Group_Code.find(item => item.value === selected_AssetGroupCode?.value)?.key;
@@ -2867,10 +2868,10 @@ if (
       <Helmet>
         <title>
           {RowID
-            ? "CMMS System"
+            ? "Asset List"
             : DuplicatRowid
-            ? "CMMS System"
-            : "CMMS System"}
+            ? "Duplicat Asset"
+            : "Asset List"}
         </title>
         <meta name="description" content="Create New Asset" />
       </Helmet>

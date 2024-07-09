@@ -29,36 +29,69 @@ export default function WorkReqTableRow({
   onDisApprove,
 }) {
  
+  // const {
+  //   wkr_mst_wr_no,
+  //   wkr_mst_wr_descs,
+  //   wkr_mst_wr_status,
+  //   wkr_mst_assetno,
+  //   wkr_mst_chg_costcenter,
+  //   wkr_mst_work_area,
+  //   wkr_mst_assetlocn,
+  //   wkr_mst_location,
+  //   wkr_mst_temp_asset,
+  //   wkr_mst_email_notification,
+  //   wkr_mst_work_type,
+  //   wkr_mst_work_class,
+  //   wkr_mst_work_group,
+  //   wkr_mst_wo_status,
+  //   wkr_mst_projectid,
+  //   wkr_mst_originator,
+  //   wkr_mst_phone,
+  //   wkr_det_wo,
+  //   wkr_det_approver,
+  //   wkr_appr_date,
+  //   wkr_det_reject_desc,
+  //   wkr_det_reject_by,
+  //   wkr_reject_date,
+  //   wkr_mst_orig_priority,
+  //   wkr_mst_org_date,
+  //   wkr_mst_due_date,
+  //   wkr_mst_fault_code,
+  //   wkr_mst_create_by,
+  //   wkr_mst_create_date,
+  // } = row;
   const {
-    wkr_mst_wr_no,
-    wkr_mst_wr_descs,
-    wkr_mst_wr_status,
-    wkr_mst_assetno,
-    wkr_mst_chg_costcenter,
-    wkr_mst_work_area,
-    wkr_mst_assetlocn,
-    wkr_mst_location,
-    wkr_mst_temp_asset,
-    wkr_mst_email_notification,
-    wkr_mst_work_type,
-    wkr_mst_work_class,
-    wkr_mst_work_group,
-    wkr_mst_wo_status,
-    wkr_mst_projectid,
-    wkr_mst_originator,
-    wkr_mst_phone,
-    wkr_det_wo,
-    wkr_det_approver,
-    wkr_appr_date,
-    wkr_det_reject_desc,
-    wkr_det_reject_by,
-    wkr_reject_date,
-    wkr_mst_orig_priority,
-    wkr_mst_org_date,
-    wkr_mst_due_date,
-    wkr_mst_fault_code,
-    wkr_mst_create_by,
-    wkr_mst_create_date,
+    col1,
+    col2,
+    col3,
+    col4,
+    col5,
+    col6,
+    col7,
+    col8,
+    col9,
+    col10,
+    col11,
+    col12,
+    col13,
+    col14,
+    col15,
+    col16,
+    col17,
+    col18,
+    col19,
+    col20,
+    col21,
+    col22,
+    col23,
+    col24,
+    col25,
+    col26,
+    col27,
+    col28,
+    col29,
+    col30,
+ 
   } = row;
 
   const confirm = useBoolean();
@@ -66,16 +99,15 @@ export default function WorkReqTableRow({
   const popover = usePopover();
   const formatDate = (dateString) => {
     if (!dateString) {
-      return ""; // Return empty string if dateString is undefined or null
+      return ""; 
     }
-  
-    // Check if dateString starts with "1900-01-01"
+    dateString = dateString.toString();
     if (dateString.startsWith("1900-01-01")) {
-      return ""; // Return empty string if dateString matches the condition
+      return ""; 
     }
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed, so add 1
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); 
     const year = date.getFullYear();
     const hours = date.getHours().toString().padStart(2, "0");
     const minutes = date.getMinutes().toString().padStart(2, "0");
@@ -84,9 +116,9 @@ export default function WorkReqTableRow({
 
   const maxCharactersToShow = 30;
   const truncatedDescription =
-  wkr_mst_wr_descs && wkr_mst_wr_descs.length > maxCharactersToShow
-      ? `${wkr_mst_wr_descs.substring(0, maxCharactersToShow)}...`
-      : wkr_mst_wr_descs;
+  col3 && col3.length > maxCharactersToShow
+      ? `${col3.substring(0, maxCharactersToShow)}...`
+      : col3;
   return (
     <>
       <TableRow hover selected={selected}>
@@ -99,16 +131,16 @@ export default function WorkReqTableRow({
           </IconButton>
         </TableCell>
 
-        <TableCell>{wkr_mst_wr_no}</TableCell>
+        <TableCell>{col2}</TableCell>
         <TableCell>
-        <Tooltip title={wkr_mst_wr_descs} placement="top" arrow >
+        <Tooltip title={col3} placement="top" arrow >
               <span>{truncatedDescription}</span>
             </Tooltip>
         </TableCell>
 
         <TableCell>
           {(() => {
-            if (wkr_mst_wr_status === "A") {
+            if (col4 === "A") {
               return (
                 <div>
                   <span
@@ -121,12 +153,12 @@ export default function WorkReqTableRow({
                       fontWeight: "bold",
                     }}
                   >
-                    Approve ({wkr_mst_wr_status})
+                    Approve ({col4})
                   </span>
                 </div>
               );
             }
-            if (wkr_mst_wr_status === "D") {
+            if (col4 === "D") {
               return (
                 <div>
                   <span
@@ -139,12 +171,12 @@ export default function WorkReqTableRow({
                       fontWeight: "bold",
                     }}
                   >
-                    Disapprove ({wkr_mst_wr_status})
+                    Disapprove ({col4})
                   </span>
                 </div>
               );
             }
-            if (wkr_mst_wr_status === "W") {
+            if (col4 === "W") {
               return (
                 <div>
                   <span
@@ -157,7 +189,7 @@ export default function WorkReqTableRow({
                       fontWeight: "bold",
                     }}
                   >
-                    Awaiting ({wkr_mst_wr_status})
+                    Awaiting ({col4})
                   </span>
                 </div>
               );
@@ -166,14 +198,14 @@ export default function WorkReqTableRow({
           })()}
         </TableCell>
 
-        <TableCell>{wkr_mst_assetno}</TableCell>
-        <TableCell>{wkr_mst_chg_costcenter}</TableCell>
-        <TableCell>{wkr_mst_work_area}</TableCell>
-        <TableCell>{wkr_mst_assetlocn}</TableCell>
-        <TableCell>{wkr_mst_location}</TableCell>
+        <TableCell>{col5}</TableCell>
+        <TableCell>{col6}</TableCell>
+        <TableCell>{col7}</TableCell>
+        <TableCell>{col8}</TableCell>
+        <TableCell>{col9}</TableCell>
         <TableCell>
           <Checkbox
-            checked={wkr_mst_temp_asset === '1'}
+            checked={col10 === '1'}
             
             inputProps={{ 'aria-label': 'disabled checkbox' }}
               color="primary" 
@@ -181,37 +213,37 @@ export default function WorkReqTableRow({
         </TableCell>
         
         <TableCell> <Checkbox
-            checked={wkr_mst_email_notification === '1'}
+            checked={col11 === '1'}
             
             inputProps={{ 'aria-label': 'disabled checkbox' }}
               color="primary" 
             />
         </TableCell>
        
-        <TableCell>{wkr_mst_work_type}</TableCell>
-        <TableCell>{wkr_mst_work_class}</TableCell>
-        <TableCell>{wkr_mst_work_group}</TableCell>
-        <TableCell>{wkr_mst_wo_status}</TableCell>
-        <TableCell>{wkr_mst_projectid}</TableCell>
-        <TableCell>{wkr_mst_originator}</TableCell>
-        <TableCell>{wkr_mst_phone}</TableCell>
-        <TableCell>{wkr_det_wo}</TableCell>
-        <TableCell>{wkr_det_approver}</TableCell>
+        <TableCell>{col12}</TableCell>
+        <TableCell>{col13}</TableCell>
+        <TableCell>{col14}</TableCell>
+        <TableCell>{col15}</TableCell>
+        <TableCell>{col16}</TableCell>
+        <TableCell>{col17}</TableCell>
+        <TableCell>{col18}</TableCell>
+        <TableCell>{col19}</TableCell>
+        <TableCell>{col20}</TableCell>
+       
+        <TableCell> {formatDate(col21)}</TableCell>
+       
+        <TableCell>{col22}</TableCell>
+        <TableCell>{col23}</TableCell>
         <TableCell>
-          {wkr_appr_date ? formatDate(wkr_appr_date.date) : ""}
+        {formatDate(col24)}
         </TableCell>
-        <TableCell>{wkr_det_reject_desc}</TableCell>
-        <TableCell>{wkr_det_reject_by}</TableCell>
-        <TableCell>
-          {wkr_reject_date ? formatDate(wkr_reject_date) : ""}
-        </TableCell>
-        <TableCell>{wkr_mst_orig_priority}</TableCell>
+        <TableCell>{col25}</TableCell>
         
-        <TableCell>{formatDate(wkr_mst_org_date.date)}</TableCell>
-        <TableCell>{formatDate(wkr_mst_due_date.date)}</TableCell>
-        <TableCell>{wkr_mst_fault_code}</TableCell>
-        <TableCell>{wkr_mst_create_by}</TableCell>
-        <TableCell>{formatDate(wkr_mst_create_date.date)}</TableCell>
+        <TableCell>{formatDate(col26)}</TableCell>
+        <TableCell>{formatDate(col27)}</TableCell>
+        <TableCell>{col28}</TableCell>
+        <TableCell>{col29}</TableCell>
+        <TableCell>{formatDate(col30)}</TableCell>
       </TableRow>
 
       <CustomPopover

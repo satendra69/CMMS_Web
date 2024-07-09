@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[668],{80668:(e,s,r)=>{r.r(s),r.d(s,{default:()=>l});var c=r(6907),n=r(96685),t=r(80184);function l(){return(0,t.jsxs)(t.Fragment,{children:[(0,t.jsx)(c.ql,{children:(0,t.jsx)("title",{children:" Dashboard: Job List"})}),(0,t.jsx)(n.JD,{})]})}}}]);
-//# sourceMappingURL=668.8922aa32.chunk.js.map

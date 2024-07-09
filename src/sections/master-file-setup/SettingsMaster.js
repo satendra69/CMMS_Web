@@ -57,6 +57,9 @@ function SettingsMaster() {
             Dashboard: Number(
               response.data.data.DeafultSettings[0].dft_mst_show_dashboard
             ),
+            dft_mst_edit_flag:Number(
+              response.data.data.DeafultSettings[0].dft_mst_edit_flag
+            ),
             AssetSectionByLocation: Number(
               response.data.data.DeafultSettings[0].dft_mst_asset_selection
             ),
@@ -313,6 +316,7 @@ function SettingsMaster() {
             <LuLayoutDashboard size={28} style={{ color: "gray" }} />
             Dashboard
           </Typography>
+          <div>
           <FormControlLabel
             control={
               <Checkbox
@@ -328,6 +332,27 @@ function SettingsMaster() {
             checked={settingData.Dashboard ? settingData.Dashboard : 0}
             name="SMTP Server requires userid/Password"
           />
+          </div>
+            {/*2  */}
+            <div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                onChange={(e) =>
+                  handleSelect("dft_mst_edit_flag", e.target.checked ? 1 : 0)
+                }
+              />
+            }
+            label={
+              findCustomizeLabel("dft_mst_edit_flag") || "Disable Dashboard Edit:"
+            }
+            sx={{ mt: 1 }}
+            checked={settingData.dft_mst_edit_flag ? settingData.dft_mst_edit_flag : 0}
+            name="Disable flag"
+          />
+          </div>
+
+
         </div>
 
         {/* Asset */}

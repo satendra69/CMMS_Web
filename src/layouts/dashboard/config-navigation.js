@@ -72,6 +72,10 @@ const SubMenuLink = {
   w_cur_mst_manager: "masterfile/currency-code",
   w_tax_mst_manager: "masterfile/tax-code",
   w_dashboard_summary:"summary",
+  w_budget_manager: "masterfile/budget",
+  w_emp_manager: "people/employ-list",
+  w_user_manager :"user/user-list"
+
 
   //"Work Order Lite": "work/list",
   // 'Dashboard Setup': 'Dashboard',

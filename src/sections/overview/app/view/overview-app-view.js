@@ -154,7 +154,7 @@ export default function OverviewAppView() {
           "&admin=" +
           emp_mst_loginID
       );
-        console.log("response____dash__",response);
+      //  console.log("response____dash__",response);
       if (response.data.status === "SUCCESS") {
         setDashbordData(response.data.data);
         setGetPRM_MST(response.data.PRM_MST);
@@ -207,7 +207,7 @@ export default function OverviewAppView() {
     });
 
     Swal.showLoading();
-    console.log("newArrayFltr____",newArrayFltr);
+    //console.log("newArrayFltr____",newArrayFltr);
     if (newArrayFltr && newArrayFltr.length > 0) {
 
       const firstItem = newArrayFltr[0];

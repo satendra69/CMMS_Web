@@ -927,7 +927,8 @@ const findCustomizerequiredLabel = (columnName) => {
                                   className="Extrasize"
                                   fullWidth
                                 
-                                  value={data.setPartNo.toUpperCase()}
+                                
+                                  value={data.setPartNo?.toUpperCase() ?? ''}
                                   // onChange={(e) => {
                                   //   // setActualHour(e.target.value);
                                   // }}

@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkcmms_web=self.webpackChunkcmms_web||[]).push([[7602],{37602:(e,s,n)=>{n.r(s),n.d(s,{default:()=>t});var r=n(6907),c=n(74007),l=n(80184);function t(){return(0,l.jsxs)(l.Fragment,{children:[(0,l.jsx)(r.ql,{children:(0,l.jsx)("title",{children:" Foundations: Colors"})}),(0,l.jsx)(c.hU,{})]})}}}]);
-//# sourceMappingURL=7602.4e2ecd91.chunk.js.map
